@@ -2,7 +2,18 @@
 
 A Flutter plugin than allow expand and collapse text.
 
-usage:
+![](read-more-text-view-flutter.gif)
+
+## usage:
+add to your pubspec
+
+```
+readmore: ^1.0.0
+```
+and import:
+```
+import 'package:readmore/readmore.dart';
+```
 
 ```dart
 ReadMoreText(
