@@ -2,6 +2,7 @@ library readmore;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:hashtagable/hashtagable.dart';
 
 enum TrimMode {
   Length,
@@ -10,21 +11,23 @@ enum TrimMode {
 
 class ReadMoreText extends StatefulWidget {
   const ReadMoreText(
-      this.data, {
-        Key key,
-        this.trimExpandedText = ' read less',
-        this.trimCollapsedText = ' ...read more',
-        this.colorClickableText,
-        this.trimLength = 240,
-        this.trimLines = 2,
-        this.trimMode = TrimMode.Length,
-        this.style,
-        this.textAlign,
-        this.textDirection,
-        this.locale,
-        this.textScaleFactor,
-        this.semanticsLabel,
-      })  : assert(data != null),
+    this.data, {
+    Key key,
+    this.trimExpandedText = ' read less',
+    this.trimCollapsedText = ' ...read more',
+    this.colorClickableText,
+    this.trimLength = 240,
+    this.trimLines = 2,
+    this.trimMode = TrimMode.Length,
+    this.style,
+    this.textAlign,
+    this.textDirection,
+    this.locale,
+    this.textScaleFactor,
+    this.semanticsLabel,
+    this.onHashTagTap,
+    this.hashTagStyle,
+  })  : assert(data != null),
         super(key: key);
 
   final String data;
@@ -35,11 +38,13 @@ class ReadMoreText extends StatefulWidget {
   final int trimLines;
   final TrimMode trimMode;
   final TextStyle style;
+  final TextStyle hashTagStyle;
   final TextAlign textAlign;
   final TextDirection textDirection;
   final Locale locale;
   final double textScaleFactor;
   final String semanticsLabel;
+  final Function onHashTagTap;
 
   @override
   ReadMoreTextState createState() => ReadMoreTextState();
@@ -90,9 +95,11 @@ class ReadMoreTextState extends State<ReadMoreText> {
         final double maxWidth = constraints.maxWidth;
 
         // Create a TextSpan with data
-        final text = TextSpan(
-          style: effectiveTextStyle,
-          text: widget.data,
+        final text = getHashTagTextSpan(
+          basicStyle: effectiveTextStyle,
+          decoratedStyle: widget.hashTagStyle,
+          source: widget.data,
+          onTap: widget.onHashTagTap,
         );
 
         // Layout and measure link
@@ -125,8 +132,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
             textSize.height,
           ));
           endIndex = textPainter.getOffsetBefore(pos.offset);
-        }
-        else {
+        } else {
           var pos = textPainter.getPositionForOffset(
             textSize.bottomLeft(Offset.zero),
           );
@@ -138,34 +144,41 @@ class ReadMoreTextState extends State<ReadMoreText> {
         switch (widget.trimMode) {
           case TrimMode.Length:
             if (widget.trimLength < widget.data.length) {
-              textSpan = TextSpan(
-                style: effectiveTextStyle,
-                text: _readMore
-                    ? widget.data.substring(0, widget.trimLength)
-                    : widget.data,
-                children: <TextSpan>[link],
-              );
+              textSpan = getHashTagTextSpan(
+                  decoratedStyle: widget.hashTagStyle,
+                  basicStyle: effectiveTextStyle,
+                  source: _readMore
+                      ? widget.data.substring(0, widget.trimLength)
+                      : widget.data,
+                  onTap: widget.onHashTagTap,
+                  children: <TextSpan>[link]);
             } else {
-              textSpan = TextSpan(
-                style: effectiveTextStyle,
-                text: widget.data,
+              textSpan = getHashTagTextSpan(
+                source: widget.data,
+                basicStyle: effectiveTextStyle,
+                decoratedStyle: widget.hashTagStyle,
+                onTap: widget.onHashTagTap,
               );
             }
             break;
           case TrimMode.Line:
             if (textPainter.didExceedMaxLines) {
-              textSpan = TextSpan(
-                style: effectiveTextStyle,
-                text: _readMore
+              textSpan = getHashTagTextSpan(
+                decoratedStyle: widget.hashTagStyle,
+                basicStyle: effectiveTextStyle,
+                source: _readMore
                     ? widget.data.substring(0, endIndex) +
-                    (linkLongerThanLine ? _kLineSeparator : '')
+                        (linkLongerThanLine ? _kLineSeparator : '')
                     : widget.data,
+                onTap: widget.onHashTagTap,
                 children: <TextSpan>[link],
               );
             } else {
-              textSpan = TextSpan(
-                style: effectiveTextStyle,
-                text: widget.data,
+              textSpan = getHashTagTextSpan(
+                source: widget.data,
+                basicStyle: effectiveTextStyle,
+                decoratedStyle: widget.hashTagStyle,
+                onTap: widget.onHashTagTap,
               );
             }
             break;

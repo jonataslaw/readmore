@@ -1,6 +1,5 @@
-
-
 import 'package:flutter/material.dart';
+import 'package:readmore/readmore.dart';
 
 void main() => runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -56,7 +55,6 @@ class DemoApp extends StatelessWidget {
                   trimExpandedText: ' Collapse ',
                 ),
               ),
-
               Divider(
                 color: const Color(0xFF167F67),
               ),
