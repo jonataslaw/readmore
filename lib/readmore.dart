@@ -95,11 +95,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
         final double maxWidth = constraints.maxWidth;
 
         // Create a TextSpan with data
-        final text = getHashTagTextSpan(
-          basicStyle: effectiveTextStyle,
-          decoratedStyle: widget.hashTagStyle,
-          source: widget.data,
-          onTap: widget.onHashTagTap,
+        final text = TextSpan(
+          style: effectiveTextStyle,
+          text: widget.data,
         );
 
         // Layout and measure link
