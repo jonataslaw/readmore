@@ -72,7 +72,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "2c0638776a2224107f33f7a92cd048acc61c8824"
+      resolved-ref: "4f22f9f7361b72f5ecd1f28756657c7931a90e06"
       url: "https://github.com/SchnMar/hashtagable.git"
     source: git
     version: "0.0.8"
