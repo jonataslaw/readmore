@@ -81,7 +81,8 @@ class ReadMoreTextState extends State<ReadMoreText> {
       style: effectiveTextStyle.copyWith(
         color: colorClickableText,
       ),
-      recognizer: TapGestureRecognizer()..onTap = _onTapLink,
+      recognizer: TapGestureRecognizer()..
+      onTap = _onTapLink,
     );
 
     Widget result = LayoutBuilder(
@@ -112,8 +113,6 @@ class ReadMoreTextState extends State<ReadMoreText> {
         textPainter.text = text;
         textPainter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
         final textSize = textPainter.size;
-
-        print('linkSize $linkSize textSize $textSize');
 
         // Get the endIndex of data
         bool linkLongerThanLine = false;
