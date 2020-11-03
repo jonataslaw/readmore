@@ -84,6 +84,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
 
     TextSpan link = TextSpan(
       text: _readMore ? widget.trimCollapsedText : widget.trimExpandedText,
+
       style: _readMore ? _defaultMoreStyle : _defaultLessStyle,
       recognizer: TapGestureRecognizer()..onTap = _onTapLink,
     );
@@ -98,6 +99,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
               : '',
       style: _defaultDelimiterStyle,
       recognizer: TapGestureRecognizer()..onTap = _onTapLink,
+
     );
 
     Widget result = LayoutBuilder(
