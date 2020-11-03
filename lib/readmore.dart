@@ -10,23 +10,28 @@ enum TrimMode {
 
 class ReadMoreText extends StatefulWidget {
   const ReadMoreText(
-      this.data, {
-        Key key,
-        this.trimExpandedText = ' read less',
-        this.trimCollapsedText = ' ...read more',
-        this.colorClickableText,
-        this.trimLength = 240,
-        this.trimLines = 2,
-        this.trimMode = TrimMode.Length,
-        this.style,
-        this.textAlign,
-        this.textDirection,
-        this.locale,
-        this.textScaleFactor,
-        this.semanticsLabel,
-      })  : assert(data != null),
+    this.data, {
+    Key key,
+    this.trimExpandedText = 'show less',
+    this.trimCollapsedText = 'read more',
+    this.colorClickableText,
+    this.trimLength = 240,
+    this.trimLines = 2,
+    this.trimMode = TrimMode.Length,
+    this.style,
+    this.textAlign,
+    this.textDirection,
+    this.locale,
+    this.textScaleFactor,
+    this.semanticsLabel,
+    this.moreStyle,
+    this.lessStyle,
+    this.delimiter = '... ',
+    this.delimiterStyle,
+  })  : assert(data != null),
         super(key: key);
 
+  final String delimiter;
   final String data;
   final String trimExpandedText;
   final String trimCollapsedText;
@@ -40,6 +45,9 @@ class ReadMoreText extends StatefulWidget {
   final Locale locale;
   final double textScaleFactor;
   final String semanticsLabel;
+  final TextStyle moreStyle;
+  final TextStyle lessStyle;
+  final TextStyle delimiterStyle;
 
   @override
   ReadMoreTextState createState() => ReadMoreTextState();
@@ -64,23 +72,31 @@ class ReadMoreTextState extends State<ReadMoreText> {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
     }
 
-    final textAlign =
-        widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start;
+    final textAlign = widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start;
     final textDirection = widget.textDirection ?? Directionality.of(context);
-    final textScaleFactor =
-        widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
+    final textScaleFactor = widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
     final overflow = defaultTextStyle.overflow;
-    final locale =
-        widget.locale ?? Localizations.localeOf(context, nullOk: true);
-
-    final colorClickableText =
-        widget.colorClickableText ?? Theme.of(context).accentColor;
+    final locale = widget.locale ?? Localizations.localeOf(context, nullOk: true);
+    final colorClickableText = widget.colorClickableText ?? Theme.of(context).accentColor;
+    final _defaultLessStyle = widget.lessStyle ?? effectiveTextStyle.copyWith(color: colorClickableText);
+    final _defaultMoreStyle = widget.moreStyle ?? effectiveTextStyle.copyWith(color: colorClickableText);
+    final _defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
 
     TextSpan link = TextSpan(
       text: _readMore ? widget.trimCollapsedText : widget.trimExpandedText,
-      style: effectiveTextStyle.copyWith(
-        color: colorClickableText,
-      ),
+      style: _readMore ? _defaultMoreStyle : _defaultLessStyle,
+      recognizer: TapGestureRecognizer()..onTap = _onTapLink,
+    );
+
+    TextSpan _delimiter = TextSpan(
+      text: _readMore
+          ? widget.trimCollapsedText.isNotEmpty
+              ? widget.delimiter
+              : ''
+          : widget.trimExpandedText.isNotEmpty
+              ? widget.delimiter
+              : '',
+      style: _defaultDelimiterStyle,
       recognizer: TapGestureRecognizer()..onTap = _onTapLink,
     );
 
@@ -113,8 +129,6 @@ class ReadMoreTextState extends State<ReadMoreText> {
         textPainter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
         final textSize = textPainter.size;
 
-        print('linkSize $linkSize textSize $textSize');
-
         // Get the endIndex of data
         bool linkLongerThanLine = false;
         int endIndex;
@@ -125,8 +139,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
             textSize.height,
           ));
           endIndex = textPainter.getOffsetBefore(pos.offset);
-        }
-        else {
+        } else {
           var pos = textPainter.getPositionForOffset(
             textSize.bottomLeft(Offset.zero),
           );
@@ -140,10 +153,8 @@ class ReadMoreTextState extends State<ReadMoreText> {
             if (widget.trimLength < widget.data.length) {
               textSpan = TextSpan(
                 style: effectiveTextStyle,
-                text: _readMore
-                    ? widget.data.substring(0, widget.trimLength)
-                    : widget.data,
-                children: <TextSpan>[link],
+                text: _readMore ? widget.data.substring(0, widget.trimLength) : widget.data,
+                children: <TextSpan>[_delimiter, link],
               );
             } else {
               textSpan = TextSpan(
@@ -157,10 +168,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
               textSpan = TextSpan(
                 style: effectiveTextStyle,
                 text: _readMore
-                    ? widget.data.substring(0, endIndex) +
-                    (linkLongerThanLine ? _kLineSeparator : '')
+                    ? widget.data.substring(0, endIndex) + (linkLongerThanLine ? _kLineSeparator : '')
                     : widget.data,
-                children: <TextSpan>[link],
+                children: <TextSpan>[_delimiter, link],
               );
             } else {
               textSpan = TextSpan(
@@ -170,8 +180,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
             }
             break;
           default:
-            throw Exception(
-                'TrimMode type: ${widget.trimMode} is not supported');
+            throw Exception('TrimMode type: ${widget.trimMode} is not supported');
         }
 
         return RichText(
