@@ -1,4 +1,4 @@
-name: readmore
+name: readmore_demo
 description: A new Flutter project.
 version: 0.0.1
 author:
@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  readmore:
+    path: ../
 
 dev_dependencies:
   flutter_test:
