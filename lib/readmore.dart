@@ -123,7 +123,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
           locale: locale,
         );
-        textPainter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
+        textPainter.layout(minWidth: 0, maxWidth: maxWidth);
         final linkSize = textPainter.size;
 
         // Layout and measure text
