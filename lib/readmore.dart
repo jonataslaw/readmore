@@ -28,7 +28,7 @@ class ReadMoreText extends StatefulWidget {
     this.lessStyle,
     this.delimiter = '... ',
     this.delimiterStyle,
-    this.onPressed,
+    this.callback,
   })  : assert(data != null),
         super(key: key);
 
@@ -49,7 +49,7 @@ class ReadMoreText extends StatefulWidget {
   final TextStyle moreStyle;
   final TextStyle lessStyle;
   final TextStyle delimiterStyle;
-  final VoidCallback pressed;
+  final Function(bool val) callback;
 
   @override
   ReadMoreTextState createState() => ReadMoreTextState();
@@ -62,12 +62,11 @@ const String _kLineSeparator = '\u2028';
 class ReadMoreTextState extends State<ReadMoreText> {
   bool _readMore = true;
 
-  void _onTapLink() {
-    if (widget.onPressed != null) {
-      widget.onPressed();
-    } else {
-      setState(() => _readMore = !_readMore);
-    }
+  void _onTapLink() {  
+    setState((){
+    _readMore = !_readMore;
+    widget.callback?.call(_readMore);
+    });
   }
 
   @override
