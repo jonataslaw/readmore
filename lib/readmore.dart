@@ -28,6 +28,7 @@ class ReadMoreText extends StatefulWidget {
     this.lessStyle,
     this.delimiter = '... ',
     this.delimiterStyle,
+    this.onPressed,
   })  : assert(data != null),
         super(key: key);
 
@@ -48,6 +49,7 @@ class ReadMoreText extends StatefulWidget {
   final TextStyle moreStyle;
   final TextStyle lessStyle;
   final TextStyle delimiterStyle;
+  final VoidCallback pressed;
 
   @override
   ReadMoreTextState createState() => ReadMoreTextState();
@@ -61,7 +63,11 @@ class ReadMoreTextState extends State<ReadMoreText> {
   bool _readMore = true;
 
   void _onTapLink() {
-    setState(() => _readMore = !_readMore);
+    if (widget.onPressed != null) {
+      widget.onPressed();
+    } else {
+      setState(() => _readMore = !_readMore);
+    }
   }
 
   @override
