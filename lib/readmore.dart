@@ -11,7 +11,7 @@ enum TrimMode {
 class ReadMoreText extends StatefulWidget {
   const ReadMoreText(
     this.data, {
-    Key key,
+    Key? key,
     this.trimExpandedText = 'show less',
     this.trimCollapsedText = 'read more',
     this.colorClickableText,
@@ -36,20 +36,20 @@ class ReadMoreText extends StatefulWidget {
   final String data;
   final String trimExpandedText;
   final String trimCollapsedText;
-  final Color colorClickableText;
+  final Color? colorClickableText;
   final int trimLength;
   final int trimLines;
   final TrimMode trimMode;
-  final TextStyle style;
-  final TextAlign textAlign;
-  final TextDirection textDirection;
-  final Locale locale;
-  final double textScaleFactor;
-  final String semanticsLabel;
-  final TextStyle moreStyle;
-  final TextStyle lessStyle;
-  final TextStyle delimiterStyle;
-  final Function(bool val) callback;
+  final TextStyle? style;
+  final TextAlign? textAlign;
+  final TextDirection? textDirection;
+  final Locale? locale;
+  final double? textScaleFactor;
+  final String? semanticsLabel;
+  final TextStyle? moreStyle;
+  final TextStyle? lessStyle;
+  final TextStyle? delimiterStyle;
+  final Function(bool val)? callback;
 
   @override
   ReadMoreTextState createState() => ReadMoreTextState();
@@ -62,18 +62,18 @@ const String _kLineSeparator = '\u2028';
 class ReadMoreTextState extends State<ReadMoreText> {
   bool _readMore = true;
 
-  void _onTapLink() {  
-    setState((){
-    _readMore = !_readMore;
-    widget.callback?.call(_readMore);
+  void _onTapLink() {
+    setState(() {
+      _readMore = !_readMore;
+      widget.callback?.call(_readMore);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
-    TextStyle effectiveTextStyle = widget.style;
-    if (widget.style == null || widget.style.inherit) {
+    TextStyle? effectiveTextStyle = widget.style;
+    if (widget.style?.inherit ?? false) {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
     }
 
@@ -88,9 +88,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
     final colorClickableText =
         widget.colorClickableText ?? Theme.of(context).accentColor;
     final _defaultLessStyle = widget.lessStyle ??
-        effectiveTextStyle.copyWith(color: colorClickableText);
+        effectiveTextStyle?.copyWith(color: colorClickableText);
     final _defaultMoreStyle = widget.moreStyle ??
-        effectiveTextStyle.copyWith(color: colorClickableText);
+        effectiveTextStyle?.copyWith(color: colorClickableText);
     final _defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
 
     TextSpan link = TextSpan(
@@ -149,7 +149,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
             textSize.width - linkSize.width,
             textSize.height,
           ));
-          endIndex = textPainter.getOffsetBefore(pos.offset);
+          endIndex = textPainter.getOffsetBefore(pos.offset) ?? 0;
         } else {
           var pos = textPainter.getPositionForOffset(
             textSize.bottomLeft(Offset.zero),
