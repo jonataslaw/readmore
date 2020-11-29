@@ -28,6 +28,7 @@ class ReadMoreText extends StatefulWidget {
     this.lessStyle,
     this.delimiter = '... ',
     this.delimiterStyle,
+    this.callback,
   })  : assert(data != null),
         super(key: key);
 
@@ -48,6 +49,7 @@ class ReadMoreText extends StatefulWidget {
   final TextStyle moreStyle;
   final TextStyle lessStyle;
   final TextStyle delimiterStyle;
+  final Function(bool val) callback;
 
   @override
   ReadMoreTextState createState() => ReadMoreTextState();
@@ -60,8 +62,11 @@ const String _kLineSeparator = '\u2028';
 class ReadMoreTextState extends State<ReadMoreText> {
   bool _readMore = true;
 
-  void _onTapLink() {
-    setState(() => _readMore = !_readMore);
+  void _onTapLink() {  
+    setState((){
+    _readMore = !_readMore;
+    widget.callback?.call(_readMore);
+    });
   }
 
   @override
@@ -72,19 +77,24 @@ class ReadMoreTextState extends State<ReadMoreText> {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
     }
 
-    final textAlign = widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start;
+    final textAlign =
+        widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start;
     final textDirection = widget.textDirection ?? Directionality.of(context);
-    final textScaleFactor = widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
+    final textScaleFactor =
+        widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
     final overflow = defaultTextStyle.overflow;
-    final locale = widget.locale ?? Localizations.localeOf(context, nullOk: true);
-    final colorClickableText = widget.colorClickableText ?? Theme.of(context).accentColor;
-    final _defaultLessStyle = widget.lessStyle ?? effectiveTextStyle.copyWith(color: colorClickableText);
-    final _defaultMoreStyle = widget.moreStyle ?? effectiveTextStyle.copyWith(color: colorClickableText);
+    final locale =
+        widget.locale ?? Localizations.localeOf(context, nullOk: true);
+    final colorClickableText =
+        widget.colorClickableText ?? Theme.of(context).accentColor;
+    final _defaultLessStyle = widget.lessStyle ??
+        effectiveTextStyle.copyWith(color: colorClickableText);
+    final _defaultMoreStyle = widget.moreStyle ??
+        effectiveTextStyle.copyWith(color: colorClickableText);
     final _defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
 
     TextSpan link = TextSpan(
       text: _readMore ? widget.trimCollapsedText : widget.trimExpandedText,
-
       style: _readMore ? _defaultMoreStyle : _defaultLessStyle,
       recognizer: TapGestureRecognizer()..onTap = _onTapLink,
     );
@@ -99,7 +109,6 @@ class ReadMoreTextState extends State<ReadMoreText> {
               : '',
       style: _defaultDelimiterStyle,
       recognizer: TapGestureRecognizer()..onTap = _onTapLink,
-
     );
 
     Widget result = LayoutBuilder(
@@ -123,7 +132,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
           locale: locale,
         );
-        textPainter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
+        textPainter.layout(minWidth: 0, maxWidth: maxWidth);
         final linkSize = textPainter.size;
 
         // Layout and measure text
@@ -155,7 +164,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
             if (widget.trimLength < widget.data.length) {
               textSpan = TextSpan(
                 style: effectiveTextStyle,
-                text: _readMore ? widget.data.substring(0, widget.trimLength) : widget.data,
+                text: _readMore
+                    ? widget.data.substring(0, widget.trimLength)
+                    : widget.data,
                 children: <TextSpan>[_delimiter, link],
               );
             } else {
@@ -170,7 +181,8 @@ class ReadMoreTextState extends State<ReadMoreText> {
               textSpan = TextSpan(
                 style: effectiveTextStyle,
                 text: _readMore
-                    ? widget.data.substring(0, endIndex) + (linkLongerThanLine ? _kLineSeparator : '')
+                    ? widget.data.substring(0, endIndex) +
+                        (linkLongerThanLine ? _kLineSeparator : '')
                     : widget.data,
                 children: <TextSpan>[_delimiter, link],
               );
@@ -182,7 +194,8 @@ class ReadMoreTextState extends State<ReadMoreText> {
             }
             break;
           default:
-            throw Exception('TrimMode type: ${widget.trimMode} is not supported');
+            throw Exception(
+                'TrimMode type: ${widget.trimMode} is not supported');
         }
 
         return RichText(

@@ -1,7 +1,6 @@
 name: readmore
-description: A Flutter plugin than allow expand and collapse text dynamically
-version: 1.0.0
-author: Jonny Borges <jonataborges01@gmail.com>
+description: A Flutter package than allow expand and collapse text dynamically
+version: 1.0.1
 homepage: https://github.com/jonataslaw/loadmore
 
 environment:
