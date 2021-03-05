@@ -84,7 +84,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
         widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
     final overflow = defaultTextStyle.overflow;
     final locale =
-        widget.locale ?? Localizations.localeOf(context);
+        widget.locale ?? Localizations.maybeLocaleOf(context);
     final colorClickableText =
         widget.colorClickableText ?? Theme.of(context).accentColor;
     final _defaultLessStyle = widget.lessStyle ??
