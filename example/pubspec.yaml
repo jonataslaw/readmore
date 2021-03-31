@@ -1,11 +1,11 @@
 name: readmore_demo
 description: A new Flutter project.
 version: 0.0.2
-author:
-homepage:
+
+publish_to: "none" 
 
 environment:
-  sdk: ">=2.12.0-259.9.beta <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:

@@ -1,4 +1,4 @@
-## [1.0.2-nullsafety]
+## [2.0.0]
 - nullsafety
 
 ## [1.0.1] 

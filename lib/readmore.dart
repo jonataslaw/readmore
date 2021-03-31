@@ -29,8 +29,7 @@ class ReadMoreText extends StatefulWidget {
     this.delimiter = '... ',
     this.delimiterStyle,
     this.callback,
-  })  : assert(data != null),
-        super(key: key);
+  }) : super(key: key);
 
   final String delimiter;
   final String data;
@@ -83,8 +82,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
     final textScaleFactor =
         widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
     final overflow = defaultTextStyle.overflow;
-    final locale =
-        widget.locale ?? Localizations.maybeLocaleOf(context);
+    final locale = widget.locale ?? Localizations.maybeLocaleOf(context);
 
     final colorClickableText =
         widget.colorClickableText ?? Theme.of(context).accentColor;
