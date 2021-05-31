@@ -26,7 +26,7 @@ class ReadMoreText extends StatefulWidget {
     this.semanticsLabel,
     this.moreStyle,
     this.lessStyle,
-    this.delimiter = '... ',
+    this.delimiter = _kEllipsis + ' ',
     this.delimiterStyle,
     this.callback,
   }) : super(key: key);
@@ -128,11 +128,16 @@ class ReadMoreTextState extends State<ReadMoreText> {
           textDirection: textDirection,
           textScaleFactor: textScaleFactor,
           maxLines: widget.trimLines,
-          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+          ellipsis: overflow == TextOverflow.ellipsis ? widget.delimiter : null,
           locale: locale,
         );
         textPainter.layout(minWidth: 0, maxWidth: maxWidth);
         final linkSize = textPainter.size;
+
+        // Layout and measure delimiter
+        textPainter.text = _delimiter;
+        textPainter.layout(minWidth: 0, maxWidth: maxWidth);
+        final delimiterSize = textPainter.size;
 
         // Layout and measure text
         textPainter.text = text;
@@ -144,8 +149,11 @@ class ReadMoreTextState extends State<ReadMoreText> {
         int endIndex;
 
         if (linkSize.width < maxWidth) {
+          final readMoreSize = linkSize.width + delimiterSize.width;
           final pos = textPainter.getPositionForOffset(Offset(
-            textSize.width - linkSize.width,
+            textDirection == TextDirection.rtl
+                ? readMoreSize
+                : textSize.width - readMoreSize,
             textSize.height,
           ));
           endIndex = textPainter.getOffsetBefore(pos.offset) ?? 0;
