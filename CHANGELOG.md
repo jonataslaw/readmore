@@ -1,3 +1,6 @@
+## [2.1.0]
+- add RTL support
+
 ## [2.0.0]
 - nullsafety
 

@@ -31,24 +31,38 @@ class ReadMoreText extends StatefulWidget {
     this.callback,
   }) : super(key: key);
 
+  /// Used on TrimMode.Length
+  final int trimLength;
+
+  /// Used on TrimMode.Lines
+  final int trimLines;
+
+  /// Determines the type of trim. TrimMode.Length takes into account
+  /// the number of letters, while TrimMode.Lines takes into account
+  /// the number of lines
+  final TrimMode trimMode;
+
+  /// TextStyle for expanded text
+  final TextStyle? moreStyle;
+
+  /// TextStyle for compressed text
+  final TextStyle? lessStyle;
+
+  ///Called when state change between expanded/compress
+  final Function(bool val)? callback;
+
   final String delimiter;
   final String data;
   final String trimExpandedText;
   final String trimCollapsedText;
   final Color? colorClickableText;
-  final int trimLength;
-  final int trimLines;
-  final TrimMode trimMode;
   final TextStyle? style;
   final TextAlign? textAlign;
   final TextDirection? textDirection;
   final Locale? locale;
   final double? textScaleFactor;
   final String? semanticsLabel;
-  final TextStyle? moreStyle;
-  final TextStyle? lessStyle;
   final TextStyle? delimiterStyle;
-  final Function(bool val)? callback;
 
   @override
   ReadMoreTextState createState() => ReadMoreTextState();
