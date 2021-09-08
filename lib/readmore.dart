@@ -12,6 +12,10 @@ class ReadMoreText extends StatefulWidget {
   const ReadMoreText(
     this.data, {
     Key? key,
+    this.preDataText,
+    this.postDataText,
+    this.preDataTextStyle,
+    this.postDataTextStyle,
     this.trimExpandedText = 'show less',
     this.trimCollapsedText = 'read more',
     this.colorClickableText,
@@ -47,6 +51,18 @@ class ReadMoreText extends StatefulWidget {
 
   /// TextStyle for compressed text
   final TextStyle? lessStyle;
+
+  /// Textspan used before the data any heading or somthing
+  final String? preDataText;
+
+  /// Textspan used after the data end or before the more/less
+  final String? postDataText;
+
+  /// Textspan used before the data any heading or somthing
+  final TextStyle? preDataTextStyle;
+
+  /// Textspan used after the data end or before the more/less
+  final TextStyle? postDataTextStyle;
 
   ///Called when state change between expanded/compress
   final Function(bool val)? callback;
@@ -127,10 +143,26 @@ class ReadMoreTextState extends State<ReadMoreText> {
         assert(constraints.hasBoundedWidth);
         final double maxWidth = constraints.maxWidth;
 
+        TextSpan? preTextSpan;
+        TextSpan? postTextSpan;
+        if (widget.preDataText != null)
+          preTextSpan = TextSpan(
+            text: widget.preDataText! + " ",
+            style: widget.preDataTextStyle ?? effectiveTextStyle,
+          );
+        if (widget.postDataText != null)
+          postTextSpan = TextSpan(
+            text: " " + widget.postDataText!,
+            style: widget.postDataTextStyle ?? effectiveTextStyle,
+          );
+
         // Create a TextSpan with data
         final text = TextSpan(
-          style: effectiveTextStyle,
-          text: widget.data,
+          children: [
+            if (preTextSpan != null) preTextSpan,
+            TextSpan(text: widget.data, style: effectiveTextStyle),
+            if (postTextSpan != null) postTextSpan
+          ],
         );
 
         // Layout and measure link
@@ -217,15 +249,19 @@ class ReadMoreTextState extends State<ReadMoreText> {
                 'TrimMode type: ${widget.trimMode} is not supported');
         }
 
-        return RichText(
+        return Text.rich(
+          TextSpan(
+            children: [
+              if (preTextSpan != null) preTextSpan,
+              textSpan,
+              if (postTextSpan != null) postTextSpan,
+            ],
+          ),
           textAlign: textAlign,
           textDirection: textDirection,
           softWrap: true,
-          //softWrap,
           overflow: TextOverflow.clip,
-          //overflow,
           textScaleFactor: textScaleFactor,
-          text: textSpan,
         );
       },
     );
