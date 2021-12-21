@@ -218,7 +218,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
                 text: _readMore
                     ? widget.data.substring(0, widget.trimLength)
                     : widget.data,
-                children: <TextSpan>[_delimiter, link],
+                children: <TextSpan>[if (_readMore) _delimiter, link],
               );
             } else {
               textSpan = TextSpan(
@@ -235,7 +235,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
                     ? widget.data.substring(0, endIndex) +
                         (linkLongerThanLine ? _kLineSeparator : '')
                     : widget.data,
-                children: <TextSpan>[_delimiter, link],
+                children: <TextSpan>[if (_readMore) _delimiter, link],
               );
             } else {
               textSpan = TextSpan(
