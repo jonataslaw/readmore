@@ -1,3 +1,6 @@
+## [2.2.0]
+- Update to Flutter 3.
+
 ## [2.1.0]
 - add RTL support
 

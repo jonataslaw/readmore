@@ -5,26 +5,48 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:example/main.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:example/main.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(MyApp());
 
+    final finderShowMore = find.byWidgetPredicate(
+      (widget) => widget is RichText && tapTextSpan(widget, "...Show more"),
+    );
+
+    final finderShowLess = find.byWidgetPredicate(
+      (widget) => widget is RichText && tapTextSpan(widget, " show less"),
+    );
+
     // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(finderShowMore, findsOneWidget);
+    expect(finderShowLess, findsNothing);
   });
+}
+
+final finder = find.byWidgetPredicate(
+  (widget) => widget is RichText && tapTextSpan(widget, "bbb "),
+);
+
+bool findTextAndTap(InlineSpan visitor, String text) {
+  if (visitor is TextSpan && visitor.text == text) {
+    (visitor.recognizer as TapGestureRecognizer).onTap?.call();
+
+    return false;
+  }
+
+  return true;
+}
+
+bool tapTextSpan(RichText richText, String text) {
+  final isTapped = !richText.text.visitChildren(
+    (visitor) => findTextAndTap(visitor, text),
+  );
+
+  return isTapped;
 }
