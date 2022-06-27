@@ -33,6 +33,7 @@ class ReadMoreText extends StatefulWidget {
     this.delimiter = _kEllipsis + ' ',
     this.delimiterStyle,
     this.callback,
+    this.withDelimiter = true,
   }) : super(key: key);
 
   /// Used on TrimMode.Length
@@ -79,6 +80,9 @@ class ReadMoreText extends StatefulWidget {
   final double? textScaleFactor;
   final String? semanticsLabel;
   final TextStyle? delimiterStyle;
+
+  /// Determines whether to use delimiter (...).
+  final bool withDelimiter;
 
   @override
   ReadMoreTextState createState() => ReadMoreTextState();
@@ -218,7 +222,10 @@ class ReadMoreTextState extends State<ReadMoreText> {
                 text: _readMore
                     ? widget.data.substring(0, widget.trimLength)
                     : widget.data,
-                children: <TextSpan>[if (_readMore) _delimiter, link],
+                children: <TextSpan>[
+                  if (_readMore && widget.withDelimiter) _delimiter,
+                  link
+                ],
               );
             } else {
               textSpan = TextSpan(
@@ -235,7 +242,10 @@ class ReadMoreTextState extends State<ReadMoreText> {
                     ? widget.data.substring(0, endIndex) +
                         (linkLongerThanLine ? _kLineSeparator : '')
                     : widget.data,
-                children: <TextSpan>[if (_readMore) _delimiter, link],
+                children: <TextSpan>[
+                  if (_readMore && widget.withDelimiter) _delimiter,
+                  link
+                ],
               );
             } else {
               textSpan = TextSpan(

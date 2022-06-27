@@ -24,6 +24,7 @@ ReadMoreText(
   trimCollapsedText: 'Show more',
   trimExpandedText: 'Show less',
   moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+  withDelimiter: true,
 );
 ```
 

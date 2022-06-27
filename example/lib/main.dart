@@ -53,6 +53,7 @@ class DemoApp extends StatelessWidget {
                   trimMode: TrimMode.Line,
                   trimCollapsedText: '...Show more',
                   trimExpandedText: ' show less',
+                  withDelimiter: true,
                 ),
               ),
               Divider(
@@ -68,6 +69,7 @@ class DemoApp extends StatelessWidget {
                   trimMode: TrimMode.Line,
                   trimCollapsedText: '...Expand',
                   trimExpandedText: ' Collapse ',
+                  withDelimiter: true,
                 ),
               ),
               Divider(
@@ -83,6 +85,7 @@ class DemoApp extends StatelessWidget {
                   trimMode: TrimMode.Line,
                   trimCollapsedText: '...Read more',
                   trimExpandedText: ' Less',
+                  withDelimiter: false,
                 ),
               ),
             ],
