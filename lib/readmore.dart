@@ -104,6 +104,8 @@ class ReadMoreTextState extends State<ReadMoreText> {
     TextStyle? effectiveTextStyle = widget.style;
     if (widget.style?.inherit ?? false) {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
+    } else {
+      effectiveTextStyle = const TextStyle();
     }
 
     final textAlign =
@@ -117,9 +119,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
     final colorClickableText =
         widget.colorClickableText ?? Theme.of(context).colorScheme.secondary;
     final _defaultLessStyle = widget.lessStyle ??
-        effectiveTextStyle?.copyWith(color: colorClickableText);
+        effectiveTextStyle.copyWith(color: colorClickableText);
     final _defaultMoreStyle = widget.moreStyle ??
-        effectiveTextStyle?.copyWith(color: colorClickableText);
+        effectiveTextStyle.copyWith(color: colorClickableText);
     final _defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
 
     TextSpan link = TextSpan(
