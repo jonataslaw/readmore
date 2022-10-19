@@ -33,6 +33,8 @@ class ReadMoreText extends StatefulWidget {
     this.delimiter = _kEllipsis + ' ',
     this.delimiterStyle,
     this.callback,
+    this.onLinkPressed,
+    this.linkTextStyle,
   }) : super(key: key);
 
   /// Used on TrimMode.Length
@@ -66,6 +68,10 @@ class ReadMoreText extends StatefulWidget {
 
   ///Called when state change between expanded/compress
   final Function(bool val)? callback;
+
+  final ValueChanged<String>? onLinkPressed;
+
+  final TextStyle? linkTextStyle;
 
   final String delimiter;
   final String data;
@@ -156,11 +162,22 @@ class ReadMoreTextState extends State<ReadMoreText> {
             style: widget.postDataTextStyle ?? effectiveTextStyle,
           );
 
+        final linkTextData = _buildData(
+          data: widget.data,
+          textStyle: effectiveTextStyle,
+          linkTextStyle: effectiveTextStyle?.copyWith(
+            decoration: TextDecoration.underline,
+            color: Colors.blue,
+          ),
+          onPressed: widget.onLinkPressed,
+          children: [],
+        );
+
         // Create a TextSpan with data
         final text = TextSpan(
           children: [
             if (preTextSpan != null) preTextSpan,
-            TextSpan(text: widget.data, style: effectiveTextStyle),
+            linkTextData,
             if (postTextSpan != null) postTextSpan
           ],
         );
@@ -213,34 +230,56 @@ class ReadMoreTextState extends State<ReadMoreText> {
         switch (widget.trimMode) {
           case TrimMode.Length:
             if (widget.trimLength < widget.data.length) {
-              textSpan = TextSpan(
-                style: effectiveTextStyle,
-                text: _readMore
+              textSpan =_buildData(
+                data: _readMore
                     ? widget.data.substring(0, widget.trimLength)
                     : widget.data,
-                children: <TextSpan>[_delimiter, link],
+                textStyle: effectiveTextStyle,
+                linkTextStyle: effectiveTextStyle?.copyWith(
+                  decoration: TextDecoration.underline,
+                  color: Colors.blue,
+                ),
+                onPressed: widget.onLinkPressed,
+                children: [_delimiter, link],
               );
             } else {
-              textSpan = TextSpan(
-                style: effectiveTextStyle,
-                text: widget.data,
+              textSpan =_buildData(
+                data: widget.data,
+                textStyle: effectiveTextStyle,
+                linkTextStyle: effectiveTextStyle?.copyWith(
+                  decoration: TextDecoration.underline,
+                  color: Colors.blue,
+                ),
+                onPressed: widget.onLinkPressed,
+                children: [],
               );
             }
             break;
           case TrimMode.Line:
             if (textPainter.didExceedMaxLines) {
-              textSpan = TextSpan(
-                style: effectiveTextStyle,
-                text: _readMore
+              textSpan =_buildData(
+                data: _readMore
                     ? widget.data.substring(0, endIndex) +
-                        (linkLongerThanLine ? _kLineSeparator : '')
+                    (linkLongerThanLine ? _kLineSeparator : '')
                     : widget.data,
-                children: <TextSpan>[_delimiter, link],
+                textStyle: effectiveTextStyle,
+                linkTextStyle: effectiveTextStyle?.copyWith(
+                  decoration: TextDecoration.underline,
+                  color: Colors.blue,
+                ),
+                onPressed: widget.onLinkPressed,
+                children: [_delimiter, link],
               );
             } else {
-              textSpan = TextSpan(
-                style: effectiveTextStyle,
-                text: widget.data,
+              textSpan =_buildData(
+                data: widget.data,
+                textStyle: effectiveTextStyle,
+                linkTextStyle: effectiveTextStyle?.copyWith(
+                  decoration: TextDecoration.underline,
+                  color: Colors.blue,
+                ),
+                onPressed: widget.onLinkPressed,
+                children: [],
               );
             }
             break;
@@ -275,5 +314,45 @@ class ReadMoreTextState extends State<ReadMoreText> {
       );
     }
     return result;
+  }
+
+  TextSpan _buildData({
+    required String data,
+    TextStyle? textStyle,
+    TextStyle? linkTextStyle,
+    ValueChanged<String>? onPressed,
+    required List<TextSpan> children,
+  }) {
+    RegExp exp = RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
+
+    List<TextSpan> contents = [];
+
+    while (exp.hasMatch(data)) {
+      final match = exp.firstMatch(data);
+
+      final firstTextPart = data.substring(0, match!.start);
+      final linkTextPart = data.substring(match.start, match.end);
+
+      contents.add(
+        TextSpan(
+          text: firstTextPart,
+        ),
+      );
+      contents.add(
+        TextSpan(
+          text: linkTextPart,
+          style: linkTextStyle,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => onPressed?.call(
+                  linkTextPart.trim(),
+                ),
+        ),
+      );
+      data = data.substring(match.end, data.length);
+    }
+    return TextSpan(
+      children: contents..addAll(children),
+      style: textStyle,
+    );
   }
 }
