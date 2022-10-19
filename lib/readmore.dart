@@ -162,22 +162,11 @@ class ReadMoreTextState extends State<ReadMoreText> {
             style: widget.postDataTextStyle ?? effectiveTextStyle,
           );
 
-        final linkTextData = _buildData(
-          data: widget.data,
-          textStyle: effectiveTextStyle,
-          linkTextStyle: effectiveTextStyle?.copyWith(
-            decoration: TextDecoration.underline,
-            color: Colors.blue,
-          ),
-          onPressed: widget.onLinkPressed,
-          children: [],
-        );
-
         // Create a TextSpan with data
         final text = TextSpan(
           children: [
             if (preTextSpan != null) preTextSpan,
-            linkTextData,
+            TextSpan(text: widget.data, style: effectiveTextStyle),
             if (postTextSpan != null) postTextSpan
           ],
         );
@@ -230,7 +219,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
         switch (widget.trimMode) {
           case TrimMode.Length:
             if (widget.trimLength < widget.data.length) {
-              textSpan =_buildData(
+              textSpan = _buildData(
                 data: _readMore
                     ? widget.data.substring(0, widget.trimLength)
                     : widget.data,
@@ -243,7 +232,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
                 children: [_delimiter, link],
               );
             } else {
-              textSpan =_buildData(
+              textSpan = _buildData(
                 data: widget.data,
                 textStyle: effectiveTextStyle,
                 linkTextStyle: effectiveTextStyle?.copyWith(
@@ -257,10 +246,10 @@ class ReadMoreTextState extends State<ReadMoreText> {
             break;
           case TrimMode.Line:
             if (textPainter.didExceedMaxLines) {
-              textSpan =_buildData(
+              textSpan = _buildData(
                 data: _readMore
                     ? widget.data.substring(0, endIndex) +
-                    (linkLongerThanLine ? _kLineSeparator : '')
+                        (linkLongerThanLine ? _kLineSeparator : '')
                     : widget.data,
                 textStyle: effectiveTextStyle,
                 linkTextStyle: effectiveTextStyle?.copyWith(
@@ -271,7 +260,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
                 children: [_delimiter, link],
               );
             } else {
-              textSpan =_buildData(
+              textSpan = _buildData(
                 data: widget.data,
                 textStyle: effectiveTextStyle,
                 linkTextStyle: effectiveTextStyle?.copyWith(
@@ -350,6 +339,11 @@ class ReadMoreTextState extends State<ReadMoreText> {
       );
       data = data.substring(match.end, data.length);
     }
+    contents.add(
+      TextSpan(
+        text: data,
+      ),
+    );
     return TextSpan(
       children: contents..addAll(children),
       style: textStyle,
