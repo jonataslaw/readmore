@@ -35,6 +35,7 @@ class ReadMoreText extends StatefulWidget {
     this.callback,
     this.onLinkPressed,
     this.linkTextStyle,
+    this.linkRegExp,
   }) : super(key: key);
 
   /// Used on TrimMode.Length
@@ -72,6 +73,8 @@ class ReadMoreText extends StatefulWidget {
   final ValueChanged<String>? onLinkPressed;
 
   final TextStyle? linkTextStyle;
+
+  final RegExp? linkRegExp;
 
   final String delimiter;
   final String data;
@@ -312,7 +315,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
     ValueChanged<String>? onPressed,
     required List<TextSpan> children,
   }) {
-    RegExp exp = RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
+    RegExp exp = widget.linkRegExp ?? RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
 
     List<TextSpan> contents = [];
 
