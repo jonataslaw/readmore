@@ -1,6 +1,8 @@
-# readmore
+# enhanced_read_more
 
 A Flutter plugin than allow expand and collapse text.
+
+This is a fork of https://github.com/jonataslaw/readmore that allows you to control the expanded and collapsed state
 
 ![](read-more-text-view-flutter.gif)
 
@@ -8,7 +10,7 @@ A Flutter plugin than allow expand and collapse text.
 add to your pubspec
 
 ```
-readmore: ^2.2.1
+enhanced_read_more: ^0.0.1
 ```
 and import:
 ```
