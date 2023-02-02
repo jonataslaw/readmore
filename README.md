@@ -8,7 +8,7 @@ A Flutter plugin than allow expand and collapse text.
 add to your pubspec
 
 ```
-readmore: ^2.1.0
+readmore: ^2.2.1
 ```
 and import:
 ```
