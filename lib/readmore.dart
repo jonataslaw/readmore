@@ -35,6 +35,7 @@ class ReadMoreText extends StatefulWidget {
     this.callback,
     this.onLinkPressed,
     this.linkTextStyle,
+    this.isExpandable = true,
   }) : super(key: key);
 
   /// Used on TrimMode.Length
@@ -69,6 +70,9 @@ class ReadMoreText extends StatefulWidget {
   ///Called when state change between expanded/compress
   final Function(bool val)? callback;
 
+  /// Expand text on readMore press
+  final bool isExpandable;
+
   final ValueChanged<String>? onLinkPressed;
 
   final TextStyle? linkTextStyle;
@@ -98,8 +102,10 @@ class ReadMoreTextState extends State<ReadMoreText> {
   bool _readMore = true;
 
   void _onTapLink() {
-    setState(() {
+    if (widget.isExpandable) {
       _readMore = !_readMore;
+    }
+    setState(() {
       widget.callback?.call(_readMore);
     });
   }
