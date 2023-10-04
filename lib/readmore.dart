@@ -139,7 +139,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           ? widget.trimCollapsedText.isNotEmpty
               ? widget.delimiter
               : ''
-          : '',
+          : ' ',
       style: _defaultDelimiterStyle,
       recognizer: TapGestureRecognizer()..onTap = _onTapLink,
     );
