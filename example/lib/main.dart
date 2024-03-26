@@ -22,7 +22,21 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class DemoApp extends StatelessWidget {
+class DemoApp extends StatefulWidget {
+  @override
+  State<DemoApp> createState() => _DemoAppState();
+}
+
+class _DemoAppState extends State<DemoApp> {
+  final isCollapsed = ValueNotifier<bool>(false);
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    isCollapsed.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,6 +94,7 @@ class DemoApp extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: ReadMoreText(
                   'The Flutter framework builds its layout via the composition of widgets, everything that you construct programmatically is a widget and these are compiled together to create the user interface. ',
+                  isCollapsed: isCollapsed,
                   trimLines: 2,
                   style: TextStyle(color: Colors.black),
                   colorClickableText: Colors.pink,
@@ -87,6 +102,15 @@ class DemoApp extends StatelessWidget {
                   trimCollapsedText: '...Read more',
                   trimExpandedText: ' Less',
                 ),
+              ),
+              ValueListenableBuilder(
+                valueListenable: isCollapsed,
+                builder: (context, value, child) {
+                  return ElevatedButton(
+                    onPressed: () => isCollapsed.value = !isCollapsed.value,
+                    child: Text('is collapsed: $value'),
+                  );
+                },
               ),
             ],
           ),

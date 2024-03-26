@@ -12,6 +12,7 @@ class ReadMoreText extends StatefulWidget {
   const ReadMoreText(
     this.data, {
     Key? key,
+    this.isCollapsed,
     this.preDataText,
     this.postDataText,
     this.preDataTextStyle,
@@ -32,10 +33,11 @@ class ReadMoreText extends StatefulWidget {
     this.lessStyle,
     this.delimiter = _kEllipsis + ' ',
     this.delimiterStyle,
-    this.callback,
     this.onLinkPressed,
     this.linkTextStyle,
   }) : super(key: key);
+
+  final ValueNotifier<bool>? isCollapsed;
 
   /// Used on TrimMode.Length
   final int trimLength;
@@ -66,9 +68,6 @@ class ReadMoreText extends StatefulWidget {
   /// Textspan used after the data end or before the more/less
   final TextStyle? postDataTextStyle;
 
-  /// Called when state change between expanded/compress
-  final Function(bool val)? callback;
-
   final ValueChanged<String>? onLinkPressed;
 
   final TextStyle? linkTextStyle;
@@ -95,17 +94,50 @@ const String _kEllipsis = '\u2026';
 const String _kLineSeparator = '\u2028';
 
 class ReadMoreTextState extends State<ReadMoreText> {
-  bool _readMore = true;
+  TapGestureRecognizer _recognizer = TapGestureRecognizer();
 
-  void _onTapLink() {
-    setState(() {
-      _readMore = !_readMore;
-      widget.callback?.call(_readMore);
-    });
+  ValueNotifier<bool>? _isCollapsed;
+  ValueNotifier<bool> get _effectiveIsCollapsed =>
+      widget.isCollapsed ?? (_isCollapsed ??= ValueNotifier(true));
+
+  void _onTap() {
+    _effectiveIsCollapsed.value = !_effectiveIsCollapsed.value;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _recognizer.onTap = _onTap;
+  }
+
+  @override
+  void didUpdateWidget(ReadMoreText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.isCollapsed == null && oldWidget.isCollapsed != null) {
+      final oldValue = oldWidget.isCollapsed!.value;
+      (_isCollapsed ??= ValueNotifier(oldValue)).value = oldValue;
+    }
+  }
+
+  @override
+  void dispose() {
+    _recognizer.dispose();
+    _isCollapsed?.dispose();
+
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: _effectiveIsCollapsed,
+      builder: _builder,
+    );
+  }
+
+  Widget _builder(BuildContext context, bool isCollapsed, Widget? child) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle? effectiveTextStyle = widget.style;
     if (widget.style?.inherit ?? false) {
@@ -128,19 +160,19 @@ class ReadMoreTextState extends State<ReadMoreText> {
     final _defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
 
     TextSpan link = TextSpan(
-      text: _readMore ? widget.trimCollapsedText : widget.trimExpandedText,
-      style: _readMore ? _defaultMoreStyle : _defaultLessStyle,
-      recognizer: TapGestureRecognizer()..onTap = _onTapLink,
+      text: isCollapsed ? widget.trimCollapsedText : widget.trimExpandedText,
+      style: isCollapsed ? _defaultMoreStyle : _defaultLessStyle,
+      recognizer: _recognizer,
     );
 
     TextSpan _delimiter = TextSpan(
-      text: _readMore
+      text: isCollapsed
           ? widget.trimCollapsedText.isNotEmpty
               ? widget.delimiter
               : ''
           : '',
       style: _defaultDelimiterStyle,
-      recognizer: TapGestureRecognizer()..onTap = _onTapLink,
+      recognizer: _recognizer,
     );
 
     Widget result = LayoutBuilder(
@@ -219,7 +251,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           case TrimMode.Length:
             if (widget.trimLength < widget.data.length) {
               textSpan = _buildData(
-                data: _readMore
+                data: isCollapsed
                     ? widget.data.substring(0, widget.trimLength)
                     : widget.data,
                 textStyle: effectiveTextStyle,
@@ -246,7 +278,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           case TrimMode.Line:
             if (textPainter.didExceedMaxLines) {
               textSpan = _buildData(
-                data: _readMore
+                data: isCollapsed
                     ? widget.data.substring(0, endIndex) +
                         (linkLongerThanLine ? _kLineSeparator : '')
                     : widget.data,
