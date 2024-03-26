@@ -26,7 +26,7 @@ class ReadMoreText extends StatefulWidget {
     this.textAlign,
     this.textDirection,
     this.locale,
-    this.textScaleFactor,
+    this.textScaler,
     this.semanticsLabel,
     this.moreStyle,
     this.lessStyle,
@@ -66,7 +66,7 @@ class ReadMoreText extends StatefulWidget {
   /// Textspan used after the data end or before the more/less
   final TextStyle? postDataTextStyle;
 
-  ///Called when state change between expanded/compress
+  /// Called when state change between expanded/compress
   final Function(bool val)? callback;
 
   final ValueChanged<String>? onLinkPressed;
@@ -82,7 +82,7 @@ class ReadMoreText extends StatefulWidget {
   final TextAlign? textAlign;
   final TextDirection? textDirection;
   final Locale? locale;
-  final double? textScaleFactor;
+  final TextScaler? textScaler;
   final String? semanticsLabel;
   final TextStyle? delimiterStyle;
 
@@ -115,8 +115,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
     final textAlign =
         widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start;
     final textDirection = widget.textDirection ?? Directionality.of(context);
-    final textScaleFactor =
-        widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
+    final textScaler = widget.textScaler ?? MediaQuery.textScalerOf(context);
     final overflow = defaultTextStyle.overflow;
     final locale = widget.locale ?? Localizations.maybeLocaleOf(context);
 
@@ -176,7 +175,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           text: link,
           textAlign: textAlign,
           textDirection: textDirection,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           maxLines: widget.trimLines,
           ellipsis: overflow == TextOverflow.ellipsis ? widget.delimiter : null,
           locale: locale,
@@ -289,7 +288,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           textDirection: textDirection,
           softWrap: true,
           overflow: TextOverflow.clip,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
         );
       },
     );
@@ -312,7 +311,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
     ValueChanged<String>? onPressed,
     required List<TextSpan> children,
   }) {
-    RegExp exp = RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
+    RegExp exp = RegExp(r'(?:(?:https?|ftp)://)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
 
     List<TextSpan> contents = [];
 
