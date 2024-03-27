@@ -46,6 +46,7 @@ class ReadMoreText extends StatefulWidget {
     this.delimiter = '$_kEllipsis ',
     this.delimiterStyle,
     this.annotations,
+    this.isExpandable = true,
   });
 
   final ValueNotifier<bool>? isCollapsed;
@@ -81,6 +82,9 @@ class ReadMoreText extends StatefulWidget {
 
   final List<Annotation>? annotations;
 
+  /// Expand text on readMore press
+  final bool isExpandable;
+
   final String delimiter;
   final String data;
   final String trimExpandedText;
@@ -112,7 +116,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
       widget.isCollapsed ?? (_isCollapsed ??= ValueNotifier(true));
 
   void _onTap() {
-    _effectiveIsCollapsed.value = !_effectiveIsCollapsed.value;
+    if (widget.isExpandable) {
+      _effectiveIsCollapsed.value = !_effectiveIsCollapsed.value;
+    }
   }
 
   RegExp? _mergeRegexPatterns(List<Annotation>? annotations) {
@@ -168,9 +174,11 @@ class ReadMoreTextState extends State<ReadMoreText> {
 
   Widget _builder(BuildContext context, bool isCollapsed, Widget? child) {
     final defaultTextStyle = DefaultTextStyle.of(context);
-    var effectiveTextStyle = widget.style;
+    TextStyle? effectiveTextStyle = widget.style;
     if (widget.style?.inherit ?? false) {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
+    } else {
+      effectiveTextStyle = const TextStyle();
     }
 
     final textAlign =
@@ -183,9 +191,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
     final colorClickableText =
         widget.colorClickableText ?? Theme.of(context).colorScheme.secondary;
     final defaultLessStyle = widget.lessStyle ??
-        effectiveTextStyle?.copyWith(color: colorClickableText);
+        effectiveTextStyle.copyWith(color: colorClickableText);
     final defaultMoreStyle = widget.moreStyle ??
-        effectiveTextStyle?.copyWith(color: colorClickableText);
+        effectiveTextStyle.copyWith(color: colorClickableText);
     final defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
 
     final link = TextSpan(
@@ -288,7 +296,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           linkLongerThanLine = true;
         }
 
-        final TextSpan textSpan;
+        late final TextSpan textSpan;
         switch (widget.trimMode) {
           case TrimMode.Length:
             if (widget.trimLength < widget.data.length) {
