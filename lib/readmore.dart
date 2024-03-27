@@ -1,17 +1,25 @@
-library readmore;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-enum TrimMode {
-  Length,
-  Line,
+enum TrimMode { Length, Line }
+
+@immutable
+class Annotation {
+  const Annotation({
+    required this.regExp,
+    required this.spanBuilder,
+  });
+
+  final RegExp regExp;
+  final TextSpan Function({required String text, TextStyle? textStyle})
+      spanBuilder;
 }
 
 class ReadMoreText extends StatefulWidget {
   const ReadMoreText(
     this.data, {
-    Key? key,
+    super.key,
+    this.isCollapsed,
     this.preDataText,
     this.postDataText,
     this.preDataTextStyle,
@@ -26,16 +34,16 @@ class ReadMoreText extends StatefulWidget {
     this.textAlign,
     this.textDirection,
     this.locale,
-    this.textScaleFactor,
+    this.textScaler,
     this.semanticsLabel,
     this.moreStyle,
     this.lessStyle,
-    this.delimiter = _kEllipsis + ' ',
+    this.delimiter = '$_kEllipsis ',
     this.delimiterStyle,
-    this.callback,
-    this.onLinkPressed,
-    this.linkTextStyle,
-  }) : super(key: key);
+    this.annotations,
+  });
+
+  final ValueNotifier<bool>? isCollapsed;
 
   /// Used on TrimMode.Length
   final int trimLength;
@@ -66,12 +74,7 @@ class ReadMoreText extends StatefulWidget {
   /// Textspan used after the data end or before the more/less
   final TextStyle? postDataTextStyle;
 
-  ///Called when state change between expanded/compress
-  final Function(bool val)? callback;
-
-  final ValueChanged<String>? onLinkPressed;
-
-  final TextStyle? linkTextStyle;
+  final List<Annotation>? annotations;
 
   final String delimiter;
   final String data;
@@ -82,7 +85,7 @@ class ReadMoreText extends StatefulWidget {
   final TextAlign? textAlign;
   final TextDirection? textDirection;
   final Locale? locale;
-  final double? textScaleFactor;
+  final TextScaler? textScaler;
   final String? semanticsLabel;
   final TextStyle? delimiterStyle;
 
@@ -95,19 +98,72 @@ const String _kEllipsis = '\u2026';
 const String _kLineSeparator = '\u2028';
 
 class ReadMoreTextState extends State<ReadMoreText> {
-  bool _readMore = true;
+  static final _nonCapturingGroupPattern = RegExp(r'\((?!\?:)');
 
-  void _onTapLink() {
-    setState(() {
-      _readMore = !_readMore;
-      widget.callback?.call(_readMore);
-    });
+  final TapGestureRecognizer _recognizer = TapGestureRecognizer();
+
+  ValueNotifier<bool>? _isCollapsed;
+  ValueNotifier<bool> get _effectiveIsCollapsed =>
+      widget.isCollapsed ?? (_isCollapsed ??= ValueNotifier(true));
+
+  void _onTap() {
+    _effectiveIsCollapsed.value = !_effectiveIsCollapsed.value;
+  }
+
+  RegExp? _mergeRegexPatterns(List<Annotation>? annotations) {
+    if (annotations == null || annotations.isEmpty) {
+      return null;
+    } else if (annotations.length == 1) {
+      return annotations[0].regExp;
+    }
+
+    // replacing groups '(' => to non capturing groups '(?:'
+    return RegExp(
+      annotations
+          .map(
+            (a) =>
+                '(${a.regExp.pattern.replaceAll(_nonCapturingGroupPattern, '(?:')})',
+          )
+          .join('|'),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _recognizer.onTap = _onTap;
+  }
+
+  @override
+  void didUpdateWidget(ReadMoreText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.isCollapsed == null && oldWidget.isCollapsed != null) {
+      final oldValue = oldWidget.isCollapsed!.value;
+      (_isCollapsed ??= ValueNotifier(oldValue)).value = oldValue;
+    }
+  }
+
+  @override
+  void dispose() {
+    _recognizer.dispose();
+    _isCollapsed?.dispose();
+
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
-    TextStyle? effectiveTextStyle = widget.style;
+    return ValueListenableBuilder(
+      valueListenable: _effectiveIsCollapsed,
+      builder: _builder,
+    );
+  }
+
+  Widget _builder(BuildContext context, bool isCollapsed, Widget? child) {
+    final defaultTextStyle = DefaultTextStyle.of(context);
+    var effectiveTextStyle = widget.style;
     if (widget.style?.inherit ?? false) {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
     }
@@ -115,78 +171,88 @@ class ReadMoreTextState extends State<ReadMoreText> {
     final textAlign =
         widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start;
     final textDirection = widget.textDirection ?? Directionality.of(context);
-    final textScaleFactor =
-        widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
+    final textScaler = widget.textScaler ?? MediaQuery.textScalerOf(context);
     final overflow = defaultTextStyle.overflow;
     final locale = widget.locale ?? Localizations.maybeLocaleOf(context);
 
     final colorClickableText =
         widget.colorClickableText ?? Theme.of(context).colorScheme.secondary;
-    final _defaultLessStyle = widget.lessStyle ??
+    final defaultLessStyle = widget.lessStyle ??
         effectiveTextStyle?.copyWith(color: colorClickableText);
-    final _defaultMoreStyle = widget.moreStyle ??
+    final defaultMoreStyle = widget.moreStyle ??
         effectiveTextStyle?.copyWith(color: colorClickableText);
-    final _defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
+    final defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
 
-    TextSpan link = TextSpan(
-      text: _readMore ? widget.trimCollapsedText : widget.trimExpandedText,
-      style: _readMore ? _defaultMoreStyle : _defaultLessStyle,
-      recognizer: TapGestureRecognizer()..onTap = _onTapLink,
+    final link = TextSpan(
+      text: isCollapsed ? widget.trimCollapsedText : widget.trimExpandedText,
+      style: isCollapsed ? defaultMoreStyle : defaultLessStyle,
+      recognizer: _recognizer,
     );
 
-    TextSpan _delimiter = TextSpan(
-      text: _readMore
+    final delimiter = TextSpan(
+      text: isCollapsed
           ? widget.trimCollapsedText.isNotEmpty
               ? widget.delimiter
               : ''
           : '',
-      style: _defaultDelimiterStyle,
-      recognizer: TapGestureRecognizer()..onTap = _onTapLink,
+      style: defaultDelimiterStyle,
+      recognizer: _recognizer,
     );
 
     Widget result = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         assert(constraints.hasBoundedWidth);
-        final double maxWidth = constraints.maxWidth;
+        final maxWidth = constraints.maxWidth;
 
         TextSpan? preTextSpan;
         TextSpan? postTextSpan;
-        if (widget.preDataText != null)
+        if (widget.preDataText != null) {
           preTextSpan = TextSpan(
-            text: widget.preDataText! + " ",
+            text: '${widget.preDataText!} ',
             style: widget.preDataTextStyle ?? effectiveTextStyle,
           );
-        if (widget.postDataText != null)
+        }
+        if (widget.postDataText != null) {
           postTextSpan = TextSpan(
-            text: " " + widget.postDataText!,
+            text: ' ${widget.postDataText!}',
             style: widget.postDataTextStyle ?? effectiveTextStyle,
           );
+        }
+
+        final regExp = _mergeRegexPatterns(widget.annotations);
+
+        final annotatedText = _buildAnnotatedTextSpan(
+          data: widget.data,
+          textStyle: effectiveTextStyle,
+          regExp: regExp,
+          annotations: widget.annotations,
+        );
 
         // Create a TextSpan with data
         final text = TextSpan(
           children: [
             if (preTextSpan != null) preTextSpan,
-            TextSpan(text: widget.data, style: effectiveTextStyle),
-            if (postTextSpan != null) postTextSpan
+            annotatedText,
+            if (postTextSpan != null) postTextSpan,
           ],
         );
 
         // Layout and measure link
-        TextPainter textPainter = TextPainter(
+        final textPainter = TextPainter(
           text: link,
           textAlign: textAlign,
           textDirection: textDirection,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           maxLines: widget.trimLines,
           ellipsis: overflow == TextOverflow.ellipsis ? widget.delimiter : null,
           locale: locale,
         );
-        textPainter.layout(minWidth: 0, maxWidth: maxWidth);
+        textPainter.layout(maxWidth: maxWidth);
         final linkSize = textPainter.size;
 
         // Layout and measure delimiter
-        textPainter.text = _delimiter;
-        textPainter.layout(minWidth: 0, maxWidth: maxWidth);
+        textPainter.text = delimiter;
+        textPainter.layout(maxWidth: maxWidth);
         final delimiterSize = textPainter.size;
 
         // Layout and measure text
@@ -195,86 +261,71 @@ class ReadMoreTextState extends State<ReadMoreText> {
         final textSize = textPainter.size;
 
         // Get the endIndex of data
-        bool linkLongerThanLine = false;
+        var linkLongerThanLine = false;
         int endIndex;
 
         if (linkSize.width < maxWidth) {
           final readMoreSize = linkSize.width + delimiterSize.width;
-          final pos = textPainter.getPositionForOffset(Offset(
-            textDirection == TextDirection.rtl
-                ? readMoreSize
-                : textSize.width - readMoreSize,
-            textSize.height,
-          ));
+          final pos = textPainter.getPositionForOffset(
+            Offset(
+              textDirection == TextDirection.rtl
+                  ? readMoreSize
+                  : textSize.width - readMoreSize,
+              textSize.height,
+            ),
+          );
           endIndex = textPainter.getOffsetBefore(pos.offset) ?? 0;
         } else {
-          var pos = textPainter.getPositionForOffset(
+          final pos = textPainter.getPositionForOffset(
             textSize.bottomLeft(Offset.zero),
           );
           endIndex = pos.offset;
           linkLongerThanLine = true;
         }
 
-        var textSpan;
+        final TextSpan textSpan;
         switch (widget.trimMode) {
           case TrimMode.Length:
             if (widget.trimLength < widget.data.length) {
-              textSpan = _buildData(
-                data: _readMore
-                    ? widget.data.substring(0, widget.trimLength)
-                    : widget.data,
-                textStyle: effectiveTextStyle,
-                linkTextStyle: effectiveTextStyle?.copyWith(
-                  decoration: TextDecoration.underline,
-                  color: Colors.blue,
-                ),
-                onPressed: widget.onLinkPressed,
-                children: [_delimiter, link],
+              final effectiveAnnotatedText = isCollapsed
+                  ? _trimTextSpan(
+                      textSpan: annotatedText,
+                      spanStartIndex: 0,
+                      endIndex: widget.trimLength,
+                    ).textSpan
+                  : annotatedText;
+
+              textSpan = TextSpan(
+                style: effectiveTextStyle,
+                children: <TextSpan>[effectiveAnnotatedText, delimiter, link],
               );
             } else {
-              textSpan = _buildData(
-                data: widget.data,
-                textStyle: effectiveTextStyle,
-                linkTextStyle: effectiveTextStyle?.copyWith(
-                  decoration: TextDecoration.underline,
-                  color: Colors.blue,
-                ),
-                onPressed: widget.onLinkPressed,
-                children: [],
-              );
+              textSpan = annotatedText;
             }
             break;
           case TrimMode.Line:
             if (textPainter.didExceedMaxLines) {
-              textSpan = _buildData(
-                data: _readMore
-                    ? widget.data.substring(0, endIndex) +
-                        (linkLongerThanLine ? _kLineSeparator : '')
-                    : widget.data,
-                textStyle: effectiveTextStyle,
-                linkTextStyle: effectiveTextStyle?.copyWith(
-                  decoration: TextDecoration.underline,
-                  color: Colors.blue,
-                ),
-                onPressed: widget.onLinkPressed,
-                children: [_delimiter, link],
+              final effectiveAnnotatedText = isCollapsed
+                  ? _trimTextSpan(
+                      textSpan: annotatedText,
+                      spanStartIndex: 0,
+                      endIndex: endIndex,
+                    ).textSpan
+                  : annotatedText;
+
+              textSpan = TextSpan(
+                style: effectiveTextStyle,
+                children: <TextSpan>[
+                  effectiveAnnotatedText,
+                  if (linkLongerThanLine) const TextSpan(text: _kLineSeparator),
+                  delimiter,
+                  link,
+                ],
               );
             } else {
-              textSpan = _buildData(
-                data: widget.data,
-                textStyle: effectiveTextStyle,
-                linkTextStyle: effectiveTextStyle?.copyWith(
-                  decoration: TextDecoration.underline,
-                  color: Colors.blue,
-                ),
-                onPressed: widget.onLinkPressed,
-                children: [],
-              );
+              textSpan = annotatedText;
             }
             break;
-          default:
-            throw Exception(
-                'TrimMode type: ${widget.trimMode} is not supported');
         }
 
         return Text.rich(
@@ -289,7 +340,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           textDirection: textDirection,
           softWrap: true,
           overflow: TextOverflow.clip,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
         );
       },
     );
@@ -305,48 +356,160 @@ class ReadMoreTextState extends State<ReadMoreText> {
     return result;
   }
 
-  TextSpan _buildData({
+  TextSpan _buildAnnotatedTextSpan({
     required String data,
-    TextStyle? textStyle,
-    TextStyle? linkTextStyle,
-    ValueChanged<String>? onPressed,
-    required List<TextSpan> children,
+    required TextStyle? textStyle,
+    required RegExp? regExp,
+    required List<Annotation>? annotations,
   }) {
-    RegExp exp = RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
-
-    List<TextSpan> contents = [];
-
-    while (exp.hasMatch(data)) {
-      final match = exp.firstMatch(data);
-
-      final firstTextPart = data.substring(0, match!.start);
-      final linkTextPart = data.substring(match.start, match.end);
-
-      contents.add(
-        TextSpan(
-          text: firstTextPart,
-        ),
-      );
-      contents.add(
-        TextSpan(
-          text: linkTextPart,
-          style: linkTextStyle,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () => onPressed?.call(
-                  linkTextPart.trim(),
-                ),
-        ),
-      );
-      data = data.substring(match.end, data.length);
+    if (regExp == null || data.isEmpty) {
+      return TextSpan(text: data, style: textStyle);
     }
-    contents.add(
-      TextSpan(
-        text: data,
-      ),
+
+    final contents = <TextSpan>[];
+
+    data.splitMapJoin(
+      regExp,
+      onMatch: (Match regexMatch) {
+        final matchedText = regexMatch.group(0)!;
+        late final Annotation matchedAnnotation;
+
+        if (annotations!.length == 1) {
+          matchedAnnotation = annotations[0];
+        } else {
+          for (var i = 0; i < regexMatch.groupCount; i++) {
+            if (matchedText == regexMatch.group(i + 1)) {
+              matchedAnnotation = annotations[i];
+              break;
+            }
+          }
+        }
+
+        final content = matchedAnnotation.spanBuilder(
+          text: matchedText,
+          textStyle: textStyle,
+        );
+
+        assert(_isTextSpan(content));
+        contents.add(content);
+
+        return '';
+      },
+      onNonMatch: (String unmatchedText) {
+        contents.add(TextSpan(text: unmatchedText));
+        return '';
+      },
     );
-    return TextSpan(
-      children: contents..addAll(children),
-      style: textStyle,
+
+    return TextSpan(style: textStyle, children: contents);
+  }
+
+  _TextSpanTrimResult _trimTextSpan({
+    required TextSpan textSpan,
+    required int spanStartIndex,
+    required int endIndex,
+  }) {
+    var spanEndIndex = spanStartIndex;
+
+    final text = textSpan.text;
+    if (text != null) {
+      final textLen = text.length;
+      spanEndIndex += textLen;
+
+      if (spanEndIndex >= endIndex) {
+        final nextSpan = TextSpan(
+          text: text.substring(0, endIndex - spanStartIndex),
+          children: null, // remove potential children
+          style: textSpan.style,
+          recognizer: textSpan.recognizer,
+          mouseCursor: textSpan.mouseCursor,
+          onEnter: textSpan.onEnter,
+          onExit: textSpan.onExit,
+          semanticsLabel: textSpan.semanticsLabel,
+          locale: textSpan.locale,
+          spellOut: textSpan.spellOut,
+        );
+
+        return _TextSpanTrimResult(
+          textSpan: nextSpan,
+          spanEndIndex: spanEndIndex,
+          didTrim: true,
+        );
+      }
+    }
+
+    var didTrim = false;
+    final newChildren = <InlineSpan>[];
+
+    final children = textSpan.children;
+    if (children != null) {
+      for (final child in children) {
+        if (child is TextSpan) {
+          final result = _trimTextSpan(
+            textSpan: child,
+            spanStartIndex: spanEndIndex,
+            endIndex: endIndex,
+          );
+
+          spanEndIndex = result.spanEndIndex;
+          newChildren.add(result.textSpan);
+
+          if (result.didTrim) {
+            didTrim = true;
+            break;
+          }
+        } else {
+          // WidgetSpan shouldn't occur
+          newChildren.add(child);
+        }
+      }
+    }
+
+    final resultTextSpan = didTrim
+        ? TextSpan(
+            text: textSpan.text,
+            children: newChildren, // update children
+            style: textSpan.style,
+            recognizer: textSpan.recognizer,
+            mouseCursor: textSpan.mouseCursor,
+            onEnter: textSpan.onEnter,
+            onExit: textSpan.onExit,
+            semanticsLabel: textSpan.semanticsLabel,
+            locale: textSpan.locale,
+            spellOut: textSpan.spellOut,
+          )
+        : textSpan;
+
+    return _TextSpanTrimResult(
+      textSpan: resultTextSpan,
+      spanEndIndex: spanEndIndex,
+      didTrim: didTrim,
     );
   }
+
+  bool _isTextSpan(InlineSpan span) {
+    if (span is! TextSpan) {
+      return false;
+    }
+
+    final children = span.children;
+    if (children == null || children.isEmpty) {
+      return true;
+    }
+
+    return children.every(_isTextSpan);
+  }
+}
+
+@immutable
+class _TextSpanTrimResult {
+  const _TextSpanTrimResult({
+    required this.textSpan,
+    required this.spanEndIndex,
+    required this.didTrim,
+  });
+
+  final TextSpan textSpan;
+  final int spanEndIndex;
+  final bool didTrim;
 }

@@ -13,14 +13,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
+    await tester.pumpWidget(const MyApp());
 
     final finderShowMore = find.byWidgetPredicate(
-      (widget) => widget is RichText && tapTextSpan(widget, "...Show more"),
+      (widget) => widget is RichText && tapTextSpan(widget, '...Show more'),
     );
 
     final finderShowLess = find.byWidgetPredicate(
-      (widget) => widget is RichText && tapTextSpan(widget, " show less"),
+      (widget) => widget is RichText && tapTextSpan(widget, ' show less'),
     );
 
     // Verify that our counter starts at 0.
@@ -29,13 +29,9 @@ void main() {
   });
 }
 
-final finder = find.byWidgetPredicate(
-  (widget) => widget is RichText && tapTextSpan(widget, "bbb "),
-);
-
 bool findTextAndTap(InlineSpan visitor, String text) {
   if (visitor is TextSpan && visitor.text == text) {
-    (visitor.recognizer as TapGestureRecognizer).onTap?.call();
+    (visitor.recognizer! as TapGestureRecognizer).onTap?.call();
 
     return false;
   }
