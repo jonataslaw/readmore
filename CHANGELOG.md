@@ -1,3 +1,6 @@
+## [2.2.1]
+- Add `collapsed` state.
+
 ## [2.2.0]
 - Update to Flutter 3.
 
