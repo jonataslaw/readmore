@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 
@@ -29,6 +30,12 @@ class DemoApp extends StatefulWidget {
 
 class _DemoAppState extends State<DemoApp> {
   final isCollapsed = ValueNotifier<bool>(false);
+
+  // K: UID, V: Username
+  final userMap = {
+    123: 'Android',
+    456: 'iOS',
+  };
 
   @override
   void dispose() {
@@ -75,16 +82,92 @@ class _DemoAppState extends State<DemoApp> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ReadMoreText(
-                  'Flutter(https://flutter.dev/) has its own UI components, along with an engine to render them on both the Android and iOS platforms. Most of those UI components, right out of the box, conform to the guidelines of Material Design.',
+                  'Flutter(https://flutter.dev/) has its own UI components, along with an engine to render them on both the <@123> and <@456> platforms <@999> http://google.com #read_more. Most of those UI components, right out of the box, conform to the guidelines of #Material Design.',
                   trimLines: 3,
                   style: TextStyle(color: Colors.black),
                   colorClickableText: Colors.pink,
                   trimMode: TrimMode.Line,
                   trimCollapsedText: '...Expand',
                   trimExpandedText: ' Collapse ',
-                  onLinkPressed: (url) {
-                    print(url);
-                  },
+                  annotations: [
+                    // URL
+                    Annotation(
+                      regExp: RegExp(
+                        r'(?:(?:https?|ftp)://)?[\w/\-?=%.]+\.[\w/\-?=%.]+',
+                      ),
+                      spanBuilder: ({
+                        required String text,
+                        TextStyle? textStyle,
+                      }) {
+                        return TextSpan(
+                          text: text,
+                          style: (textStyle ?? TextStyle()).copyWith(
+                            decoration: TextDecoration.underline,
+                            color: Colors.green,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => print(text),
+                        );
+                      },
+                    ),
+                    // Mention
+                    Annotation(
+                      regExp: RegExp(r'<@(\d+)>'),
+                      spanBuilder: ({
+                        required String text,
+                        TextStyle? textStyle,
+                      }) {
+                        final user = userMap[int.tryParse(
+                          text.substring(2, text.length - 1),
+                        )];
+
+                        if (user == null) {
+                          // return WidgetSpan(child: Icon(Icons.no_accounts));
+                          return TextSpan(
+                            text: '@unknown user',
+                            style: (textStyle ?? TextStyle()).copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => print('User not found'),
+                          );
+                        }
+
+                        return TextSpan(
+                          text: '@$user',
+                          style: (textStyle ?? TextStyle()).copyWith(
+                            decoration: TextDecoration.underline,
+                            color: Colors.redAccent,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => print('@$user'),
+                          children: [
+                            if (user == 'iOS') TextSpan(text: 'Extra')
+                          ],
+                        );
+                      },
+                    ),
+                    // Hashtag
+                    Annotation(
+                      // Test: non capturing group should work also
+                      regExp: RegExp(r'#(?:[a-zA-Z0-9_]+)'),
+                      spanBuilder: ({
+                        required String text,
+                        TextStyle? textStyle,
+                      }) {
+                        return TextSpan(
+                          text: text,
+                          style: (textStyle ?? TextStyle()).copyWith(
+                            color: Colors.blueAccent,
+                            height: 1.5,
+                            letterSpacing: 5.0,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => print(text),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
               Divider(
