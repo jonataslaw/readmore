@@ -36,6 +36,7 @@ class ReadMoreText extends StatefulWidget {
     this.callback,
     this.onLinkPressed,
     this.linkTextStyle,
+    this.isExpandable = true,
     this.linkRegExp,
     this.withDelimiter = true,
   }) : super(key: key);
@@ -74,6 +75,9 @@ class ReadMoreText extends StatefulWidget {
 
   ///Called when state change between expanded/compress
   final Function(bool val)? callback;
+
+  /// Expand text on readMore press
+  final bool isExpandable;
 
   final ValueChanged<String>? onLinkPressed;
 
@@ -125,9 +129,10 @@ class ReadMoreTextState extends State<ReadMoreText> {
   }
 
   void _onTapLink() {
-    setState(() {
+    if (widget.isExpandable) {
       collapsed = !collapsed;
-
+    }
+    setState(() {
       widget.callback?.call(collapsed);
     });
   }
