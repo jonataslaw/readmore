@@ -2,9 +2,10 @@
 
 A Flutter plugin that allows for expanding and collapsing text with the added capability to style and interact with specific patterns in the text like hashtags, URLs, and mentions using the new `Annotation` feature.
 
-![](read-more-text-view-flutter.mp4)
+![](read-more-text-view-flutter.gif)
 
 ## Usage:
+
 Add the package to your pubspec.yaml:
 
 ```yaml
@@ -64,4 +65,3 @@ ReadMoreText(
   moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
 );
 ```
-
