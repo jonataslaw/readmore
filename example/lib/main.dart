@@ -62,13 +62,16 @@ class DemoApp extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ReadMoreText(
-                  'Flutter has its own UI components, along with an engine to render them on both the Android and iOS platforms. Most of those UI components, right out of the box, conform to the guidelines of Material Design.',
+                  'Flutter(https://flutter.dev/) has its own UI components, along with an engine to render them on both the Android and iOS platforms. Most of those UI components, right out of the box, conform to the guidelines of Material Design.',
                   trimLines: 3,
                   style: TextStyle(color: Colors.black),
                   colorClickableText: Colors.pink,
                   trimMode: TrimMode.Line,
                   trimCollapsedText: '...Expand',
                   trimExpandedText: ' Collapse ',
+                  onLinkPressed: (url) {
+                    print(url);
+                  },
                   withDelimiter: true,
                 ),
               ),
