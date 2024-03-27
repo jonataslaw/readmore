@@ -53,6 +53,12 @@ class _DemoAppState extends State<DemoApp> {
   void _decrementTrimLength() =>
       setState(() => _trimLength = _trimLength > 1 ? _trimLength - 1 : 1);
 
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -67,10 +73,7 @@ class _DemoAppState extends State<DemoApp> {
         title: const Text('Read More Text'),
       ),
       body: DefaultTextStyle.merge(
-        style: const TextStyle(
-          fontSize: 16,
-          //fontFamily: 'monospace',
-        ),
+        style: const TextStyle(fontSize: 14),
         child: DraggableDivider(
           child: SingleChildScrollView(
             child: _buildContent(),
@@ -131,7 +134,7 @@ class _DemoAppState extends State<DemoApp> {
                       color: Colors.green,
                     ),
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () => print(text),
+                      ..onTap = () => _showMessage(text),
                   );
                 },
               ),
@@ -153,7 +156,7 @@ class _DemoAppState extends State<DemoApp> {
                         fontWeight: FontWeight.bold,
                       ),
                       recognizer: TapGestureRecognizer()
-                        ..onTap = () => print('User not found'),
+                        ..onTap = () => _showMessage('User not found'),
                     );
                   }
 
@@ -164,7 +167,7 @@ class _DemoAppState extends State<DemoApp> {
                       color: Colors.redAccent,
                     ),
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () => print('@$user'),
+                      ..onTap = () => _showMessage('@$user'),
                     children: [
                       if (user == 'iOS') const TextSpan(text: 'Extra'),
                     ],
@@ -187,7 +190,7 @@ class _DemoAppState extends State<DemoApp> {
                       letterSpacing: 5,
                     ),
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () => print(text),
+                      ..onTap = () => _showMessage(text),
                   );
                 },
               ),
