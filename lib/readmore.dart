@@ -41,6 +41,7 @@ class ReadMoreText extends StatefulWidget {
     this.delimiter = '$_kEllipsis ',
     this.delimiterStyle,
     this.annotations,
+    this.isExpandable = true,
   });
 
   final ValueNotifier<bool>? isCollapsed;
@@ -76,6 +77,9 @@ class ReadMoreText extends StatefulWidget {
 
   final List<Annotation>? annotations;
 
+  /// Expand text on readMore press
+  final bool isExpandable;
+
   final String delimiter;
   final String data;
   final String trimExpandedText;
@@ -107,7 +111,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
       widget.isCollapsed ?? (_isCollapsed ??= ValueNotifier(true));
 
   void _onTap() {
-    _effectiveIsCollapsed.value = !_effectiveIsCollapsed.value;
+    if (widget.isExpandable) {
+      _effectiveIsCollapsed.value = !_effectiveIsCollapsed.value;
+    }
   }
 
   RegExp? _mergeRegexPatterns(List<Annotation>? annotations) {
@@ -285,7 +291,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           linkLongerThanLine = true;
         }
 
-        final TextSpan textSpan;
+        late final TextSpan textSpan;
         switch (widget.trimMode) {
           case TrimMode.Length:
             if (widget.trimLength < widget.data.length) {
