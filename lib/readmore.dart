@@ -36,6 +36,7 @@ class ReadMoreText extends StatefulWidget {
     this.onLinkPressed,
     this.linkTextStyle,
     this.linkRegExp,
+    this.withDelimiter = true,
   }) : super(key: key);
 
   /// Used on TrimMode.Length
@@ -89,6 +90,9 @@ class ReadMoreText extends StatefulWidget {
   final String? semanticsLabel;
   final TextStyle? delimiterStyle;
 
+  /// Determines whether to use delimiter (...).
+  final bool withDelimiter;
+
   @override
   ReadMoreTextState createState() => ReadMoreTextState();
 }
@@ -113,6 +117,8 @@ class ReadMoreTextState extends State<ReadMoreText> {
     TextStyle? effectiveTextStyle = widget.style;
     if (widget.style?.inherit ?? false) {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
+    } else {
+      effectiveTextStyle = const TextStyle();
     }
 
     final textAlign =
@@ -126,9 +132,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
     final colorClickableText =
         widget.colorClickableText ?? Theme.of(context).colorScheme.secondary;
     final _defaultLessStyle = widget.lessStyle ??
-        effectiveTextStyle?.copyWith(color: colorClickableText);
+        effectiveTextStyle.copyWith(color: colorClickableText);
     final _defaultMoreStyle = widget.moreStyle ??
-        effectiveTextStyle?.copyWith(color: colorClickableText);
+        effectiveTextStyle.copyWith(color: colorClickableText);
     final _defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
 
     TextSpan link = TextSpan(
@@ -232,7 +238,10 @@ class ReadMoreTextState extends State<ReadMoreText> {
                   color: Colors.blue,
                 ),
                 onPressed: widget.onLinkPressed,
-                children: [_delimiter, link],
+                children: <TextSpan>[
+                  if (_readMore && widget.withDelimiter) _delimiter,
+                  link
+                ],
               );
             } else {
               textSpan = _buildData(
@@ -260,7 +269,10 @@ class ReadMoreTextState extends State<ReadMoreText> {
                   color: Colors.blue,
                 ),
                 onPressed: widget.onLinkPressed,
-                children: [_delimiter, link],
+                children: <TextSpan>[
+                  if (_readMore && widget.withDelimiter) _delimiter,
+                  link
+                ],
               );
             } else {
               textSpan = _buildData(
