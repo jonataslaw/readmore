@@ -12,6 +12,7 @@ class ReadMoreText extends StatefulWidget {
   const ReadMoreText(
     this.data, {
     Key? key,
+    this.collapsed = false,
     this.preDataText,
     this.postDataText,
     this.preDataTextStyle,
@@ -38,6 +39,9 @@ class ReadMoreText extends StatefulWidget {
     this.linkRegExp,
     this.withDelimiter = true,
   }) : super(key: key);
+
+  /// Used to control at the `read more` `show less` state
+  final bool collapsed;
 
   /// Used on TrimMode.Length
   final int trimLength;
@@ -102,12 +106,29 @@ const String _kEllipsis = '\u2026';
 const String _kLineSeparator = '\u2028';
 
 class ReadMoreTextState extends State<ReadMoreText> {
-  bool _readMore = true;
+  late bool collapsed;
+
+  @override
+  void initState() {
+    collapsed = widget.collapsed;
+
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant ReadMoreText oldWidget) {
+    if (oldWidget.collapsed != widget.collapsed) {
+      collapsed = widget.collapsed;
+    }
+
+    super.didUpdateWidget(oldWidget);
+  }
 
   void _onTapLink() {
     setState(() {
-      _readMore = !_readMore;
-      widget.callback?.call(_readMore);
+      collapsed = !collapsed;
+
+      widget.callback?.call(collapsed);
     });
   }
 
@@ -138,13 +159,13 @@ class ReadMoreTextState extends State<ReadMoreText> {
     final _defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
 
     TextSpan link = TextSpan(
-      text: _readMore ? widget.trimCollapsedText : widget.trimExpandedText,
-      style: _readMore ? _defaultMoreStyle : _defaultLessStyle,
+      text: collapsed ? widget.trimCollapsedText : widget.trimExpandedText,
+      style: collapsed ? _defaultMoreStyle : _defaultLessStyle,
       recognizer: TapGestureRecognizer()..onTap = _onTapLink,
     );
 
     TextSpan _delimiter = TextSpan(
-      text: _readMore
+      text: collapsed
           ? widget.trimCollapsedText.isNotEmpty
               ? widget.delimiter
               : ''
@@ -229,7 +250,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           case TrimMode.Length:
             if (widget.trimLength < widget.data.length) {
               textSpan = _buildData(
-                data: _readMore
+                data: collapsed
                     ? widget.data.substring(0, widget.trimLength)
                     : widget.data,
                 textStyle: effectiveTextStyle,
@@ -259,7 +280,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           case TrimMode.Line:
             if (textPainter.didExceedMaxLines) {
               textSpan = _buildData(
-                data: _readMore
+                data: collapsed
                     ? widget.data.substring(0, endIndex) +
                         (linkLongerThanLine ? _kLineSeparator : '')
                     : widget.data,
