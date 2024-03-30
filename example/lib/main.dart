@@ -41,7 +41,7 @@ class _DemoAppState extends State<DemoApp> {
 
   var _trimMode = TrimMode.Line;
   int _trimLines = 3;
-  int _trimLength = 240;
+  int _trimLength = 190;
 
   void _incrementTrimLines() => setState(() => _trimLines++);
 
@@ -224,6 +224,48 @@ class _DemoAppState extends State<DemoApp> {
               ),
             );
           },
+        ),
+        const Divider(
+          color: Color(0xFF167F67),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          // Rich version
+          child: ReadMoreText.rich(
+            TextSpan(
+              style: const TextStyle(color: Colors.black),
+              children: [
+                const TextSpan(text: 'The '),
+                const TextSpan(
+                  text: 'Flutter framework ',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                    letterSpacing: 5,
+                  ),
+                ),
+                const TextSpan(
+                  text: 'builds its layout via the composition of ',
+                ),
+                TextSpan(
+                  text: 'widgets, ',
+                  style: const TextStyle(color: Colors.green),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => _showMessage('Widgets tapped!'),
+                ),
+                const TextSpan(
+                  text:
+                      'everything that you construct programmatically is a widget and these are compiled together to create the user interface.',
+                ),
+              ],
+            ),
+            trimMode: _trimMode,
+            trimLines: _trimLines,
+            trimLength: _trimLength,
+            colorClickableText: Colors.pink,
+            trimCollapsedText: '...Read more',
+            trimExpandedText: ' Less',
+          ),
         ),
       ],
     );

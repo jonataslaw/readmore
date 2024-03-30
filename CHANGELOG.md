@@ -1,3 +1,9 @@
+## [3.1.0]
+
+Contributed by [@maRci002](https://github.com/maRci002) - see PR [#59](https://github.com/jonataslaw/readmore/pull/59).
+
+- Added `ReadMoreText.rich` constructor for rich text formatting and interactivity, enhancing text presentation with customizable styles and interactive elements.
+
 ## [3.0.0]
 
 Contributed by [@maRci002](https://github.com/maRci002) - see PR [#54](https://github.com/jonataslaw/readmore/pull/54).
