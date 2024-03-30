@@ -125,11 +125,11 @@ class _DemoAppState extends State<DemoApp> {
                 ),
                 spanBuilder: ({
                   required String text,
-                  TextStyle? textStyle,
+                  required TextStyle textStyle,
                 }) {
                   return TextSpan(
                     text: text,
-                    style: (textStyle ?? const TextStyle()).copyWith(
+                    style: textStyle.copyWith(
                       decoration: TextDecoration.underline,
                       color: Colors.green,
                     ),
@@ -152,6 +152,7 @@ class _DemoAppState extends State<DemoApp> {
                   if (user == null) {
                     return TextSpan(
                       text: '@unknown user',
+                      // making TextStyle to non nullable doesn't break 3.0.0 version
                       style: (textStyle ?? const TextStyle()).copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -180,11 +181,11 @@ class _DemoAppState extends State<DemoApp> {
                 regExp: RegExp('#(?:[a-zA-Z0-9_]+)'),
                 spanBuilder: ({
                   required String text,
-                  TextStyle? textStyle,
+                  required TextStyle textStyle,
                 }) {
                   return TextSpan(
                     text: text,
-                    style: (textStyle ?? const TextStyle()).copyWith(
+                    style: textStyle.copyWith(
                       color: Colors.blueAccent,
                       height: 1.5,
                       letterSpacing: 5,
@@ -259,10 +260,11 @@ class _DemoAppState extends State<DemoApp> {
                 ),
               ],
             ),
+            style: TextStyle(inherit: false),
             trimMode: _trimMode,
             trimLines: _trimLines,
             trimLength: _trimLength,
-            colorClickableText: Colors.pink,
+            colorClickableText: Colors.blueAccent,
             trimCollapsedText: '...Read more',
             trimExpandedText: ' Less',
           ),

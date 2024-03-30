@@ -76,9 +76,9 @@ ReadMoreText(
   annotations: [
     Annotation(
       regExp: RegExp(r'#([a-zA-Z0-9_]+)'),
-      spanBuilder: ({required String text, TextStyle? textStyle}) => TextSpan(
+      spanBuilder: ({required String text, required TextStyle textStyle}) => TextSpan(
         text: text,
-        style: textStyle?.copyWith(color: Colors.blue),
+        style: textStyle.copyWith(color: Colors.blue),
       ),
     ),
     Annotation(

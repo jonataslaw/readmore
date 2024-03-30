@@ -18,7 +18,7 @@ class Annotation {
   });
 
   final RegExp regExp;
-  final TextSpan Function({required String text, TextStyle? textStyle})
+  final TextSpan Function({required String text, required TextStyle textStyle})
       spanBuilder;
 }
 
@@ -238,12 +238,14 @@ class ReadMoreTextState extends State<ReadMoreText> {
 
   Widget _builder(BuildContext context, bool isCollapsed, Widget? child) {
     final defaultTextStyle = DefaultTextStyle.of(context);
-    var effectiveTextStyle = widget.style;
+    TextStyle effectiveTextStyle;
     if (widget.style == null || widget.style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
+    } else {
+      effectiveTextStyle = widget.style!;
     }
     if (MediaQuery.boldTextOf(context)) {
-      effectiveTextStyle = effectiveTextStyle!
+      effectiveTextStyle = effectiveTextStyle
           .merge(const TextStyle(fontWeight: FontWeight.bold));
     }
     final registrar = SelectionContainer.maybeOf(context);
@@ -267,9 +269,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
     final colorClickableText =
         widget.colorClickableText ?? Theme.of(context).colorScheme.secondary;
     final defaultLessStyle = widget.lessStyle ??
-        effectiveTextStyle?.copyWith(color: colorClickableText);
+        effectiveTextStyle.copyWith(color: colorClickableText);
     final defaultMoreStyle = widget.moreStyle ??
-        effectiveTextStyle?.copyWith(color: colorClickableText);
+        effectiveTextStyle.copyWith(color: colorClickableText);
     final defaultDelimiterStyle = widget.delimiterStyle ?? effectiveTextStyle;
 
     final link = TextSpan(
@@ -498,7 +500,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
 
   TextSpan _buildAnnotatedTextSpan({
     required String data,
-    required TextStyle? textStyle,
+    required TextStyle textStyle,
     required RegExp? regExp,
     required List<Annotation>? annotations,
   }) {
