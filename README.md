@@ -1,6 +1,6 @@
 # readmore
 
-A Flutter plugin that allows for expanding and collapsing text with the added capability to style and interact with specific patterns in the text like hashtags, URLs, and mentions using the new `Annotation` feature.
+A Flutter plugin that allows for expanding and collapsing text with the added capability to style and interact with specific patterns in the text like hashtags, URLs, and mentions using the `Annotation` feature.
 
 ![](read-more-text-view-flutter.gif)
 
@@ -83,9 +83,9 @@ ReadMoreText(
     ),
     Annotation(
       regExp: RegExp(r'<@(\d+)>'),
-      spanBuilder: ({required String text, TextStyle? textStyle}) => TextSpan(
+      spanBuilder: ({required String text, required TextStyle textStyle}) => TextSpan(
         text: 'User123',
-        style: textStyle?.copyWith(color: Colors.green),
+        style: textStyle.copyWith(color: Colors.green),
         recognizer: TapGestureRecognizer()..onTap = () {
           // Handle tap, e.g., navigate to a user profile
         },
@@ -96,3 +96,5 @@ ReadMoreText(
   moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
 );
 ```
+
+_Note: This feature is not available with the `ReadMoreText.rich` constructor, as `TextSpan` gives you total control over styling and adding interactions to parts of the text._
