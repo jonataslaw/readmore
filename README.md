@@ -32,6 +32,37 @@ ReadMoreText(
 );
 ```
 
+### Rich Text Example
+
+With the `ReadMoreText.rich` constructor, you can create text with rich formatting, including different colors, decorations, letter spacing, and interactive elements within a single widget.
+
+```dart
+ReadMoreText.rich(
+  TextSpan(
+    style: const TextStyle(color: Colors.black),
+    children: [
+      const TextSpan(text: 'Rich '),
+      const TextSpan(
+        text: 'Text',
+        style: TextStyle(
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+          letterSpacing: 5,
+          recognizer: TapGestureRecognizer()..onTap = () {
+            // Handle tap
+          },
+        ),
+      ),
+    ],
+  ),
+  trimMode: TrimMode.Line,
+  trimLines: 2,
+  colorClickableText: Colors.pink,
+  trimCollapsedText: '...Read more',
+  trimExpandedText: ' Less',
+);
+```
+
 ### Using Annotations
 
 The `Annotation` feature enhances the interactivity and functionality of the text content. You can define custom styles and interactions for patterns like hashtags, URLs, and mentions.
@@ -45,9 +76,9 @@ ReadMoreText(
   annotations: [
     Annotation(
       regExp: RegExp(r'#([a-zA-Z0-9_]+)'),
-      spanBuilder: ({required String text, TextStyle? textStyle}) => TextSpan(
+      spanBuilder: ({required String text, required TextStyle textStyle}) => TextSpan(
         text: text,
-        style: textStyle?.copyWith(color: Colors.blue),
+        style: textStyle.copyWith(color: Colors.blue),
       ),
     ),
     Annotation(

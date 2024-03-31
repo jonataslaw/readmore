@@ -1,6 +1,6 @@
 name: readmore
 description: A Flutter package that allows for dynamic expansion and collapse of text, as well as interactions with text patterns such as hashtags, URLs, and mentions.
-version: 3.0.0
+version: 3.1.0
 homepage: https://github.com/jonataslaw/loadmore
 
 environment:

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui show TextHeightBehavior;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -16,13 +18,13 @@ class Annotation {
   });
 
   final RegExp regExp;
-  final TextSpan Function({required String text, TextStyle? textStyle})
+  final TextSpan Function({required String text, required TextStyle textStyle})
       spanBuilder;
 }
 
 class ReadMoreText extends StatefulWidget {
   const ReadMoreText(
-    this.data, {
+    String this.data, {
     super.key,
     this.isCollapsed,
     this.preDataText,
@@ -35,19 +37,63 @@ class ReadMoreText extends StatefulWidget {
     this.trimLength = 240,
     this.trimLines = 2,
     this.trimMode = TrimMode.Length,
-    this.style,
-    this.textAlign,
-    this.textDirection,
-    this.locale,
-    this.textScaler,
-    this.semanticsLabel,
     this.moreStyle,
     this.lessStyle,
     this.delimiter = '$_kEllipsis ',
     this.delimiterStyle,
     this.annotations,
     this.isExpandable = true,
-  });
+    this.style,
+    this.strutStyle,
+    this.textAlign,
+    this.textDirection,
+    this.locale,
+    this.softWrap,
+    this.overflow,
+    this.textScaler,
+    this.semanticsLabel,
+    this.textWidthBasis,
+    this.textHeightBehavior,
+    this.selectionColor,
+  })  : richData = null,
+        richPreData = null,
+        richPostData = null;
+
+  const ReadMoreText.rich(
+    TextSpan this.richData, {
+    super.key,
+    this.richPreData,
+    this.richPostData,
+    this.isCollapsed,
+    this.trimExpandedText = 'show less',
+    this.trimCollapsedText = 'read more',
+    this.colorClickableText,
+    this.trimLength = 240,
+    this.trimLines = 2,
+    this.trimMode = TrimMode.Length,
+    this.moreStyle,
+    this.lessStyle,
+    this.delimiter = '$_kEllipsis ',
+    this.delimiterStyle,
+    this.isExpandable = true,
+    this.style,
+    this.strutStyle,
+    this.textAlign,
+    this.textDirection,
+    this.locale,
+    this.softWrap,
+    this.overflow,
+    this.textScaler,
+    this.semanticsLabel,
+    this.textWidthBasis,
+    this.textHeightBehavior,
+    this.selectionColor,
+  })  : data = null,
+        annotations = null,
+        preDataText = null,
+        postDataText = null,
+        preDataTextStyle = null,
+        postDataTextStyle = null;
 
   final ValueNotifier<bool>? isCollapsed;
 
@@ -80,23 +126,41 @@ class ReadMoreText extends StatefulWidget {
   /// Textspan used after the data end or before the more/less
   final TextStyle? postDataTextStyle;
 
+  /// Rich version of [preDataText]
+  final TextSpan? richPreData;
+
+  /// Rich version of [postDataText]
+  final TextSpan? richPostData;
+
   final List<Annotation>? annotations;
 
   /// Expand text on readMore press
   final bool isExpandable;
 
   final String delimiter;
-  final String data;
+  final String? data;
+  final TextSpan? richData;
   final String trimExpandedText;
   final String trimCollapsedText;
   final Color? colorClickableText;
+  final TextStyle? delimiterStyle;
+
+  // DefaultTextStyle start
+
   final TextStyle? style;
+  final StrutStyle? strutStyle;
   final TextAlign? textAlign;
   final TextDirection? textDirection;
   final Locale? locale;
+  final bool? softWrap;
+  final TextOverflow? overflow;
   final TextScaler? textScaler;
   final String? semanticsLabel;
-  final TextStyle? delimiterStyle;
+  final TextWidthBasis? textWidthBasis;
+  final ui.TextHeightBehavior? textHeightBehavior;
+  final Color? selectionColor;
+
+  // DefaultTextStyle end
 
   @override
   ReadMoreTextState createState() => ReadMoreTextState();
@@ -174,19 +238,33 @@ class ReadMoreTextState extends State<ReadMoreText> {
 
   Widget _builder(BuildContext context, bool isCollapsed, Widget? child) {
     final defaultTextStyle = DefaultTextStyle.of(context);
-    TextStyle? effectiveTextStyle = widget.style;
-    if (widget.style?.inherit ?? false) {
+    TextStyle effectiveTextStyle;
+    if (widget.style == null || widget.style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
     } else {
-      effectiveTextStyle = const TextStyle();
+      effectiveTextStyle = widget.style!;
     }
+    if (MediaQuery.boldTextOf(context)) {
+      effectiveTextStyle = effectiveTextStyle
+          .merge(const TextStyle(fontWeight: FontWeight.bold));
+    }
+    final registrar = SelectionContainer.maybeOf(context);
+    final textScaler = widget.textScaler ?? MediaQuery.textScalerOf(context);
 
     final textAlign =
         widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start;
     final textDirection = widget.textDirection ?? Directionality.of(context);
-    final textScaler = widget.textScaler ?? MediaQuery.textScalerOf(context);
-    final overflow = defaultTextStyle.overflow;
     final locale = widget.locale ?? Localizations.maybeLocaleOf(context);
+    final softWrap = widget.softWrap ?? defaultTextStyle.softWrap;
+    final overflow = widget.overflow ?? defaultTextStyle.overflow;
+    final textWidthBasis =
+        widget.textWidthBasis ?? defaultTextStyle.textWidthBasis;
+    final textHeightBehavior = widget.textHeightBehavior ??
+        defaultTextStyle.textHeightBehavior ??
+        DefaultTextHeightBehavior.maybeOf(context);
+    final selectionColor = widget.selectionColor ??
+        DefaultSelectionStyle.of(context).selectionColor ??
+        DefaultSelectionStyle.defaultColor;
 
     final colorClickableText =
         widget.colorClickableText ?? Theme.of(context).colorScheme.secondary;
@@ -219,33 +297,46 @@ class ReadMoreTextState extends State<ReadMoreText> {
 
         TextSpan? preTextSpan;
         TextSpan? postTextSpan;
-        if (widget.preDataText != null) {
+
+        if (widget.richPreData != null) {
+          preTextSpan = widget.richPreData;
+        } else if (widget.preDataText != null) {
           preTextSpan = TextSpan(
             text: '${widget.preDataText!} ',
             style: widget.preDataTextStyle ?? effectiveTextStyle,
           );
         }
-        if (widget.postDataText != null) {
+
+        if (widget.richPostData != null) {
+          postTextSpan = widget.richPostData;
+        } else if (widget.postDataText != null) {
           postTextSpan = TextSpan(
             text: ' ${widget.postDataText!}',
             style: widget.postDataTextStyle ?? effectiveTextStyle,
           );
         }
 
-        final regExp = _mergeRegexPatterns(widget.annotations);
-
-        final annotatedText = _buildAnnotatedTextSpan(
-          data: widget.data,
-          textStyle: effectiveTextStyle,
-          regExp: regExp,
-          annotations: widget.annotations,
-        );
+        final TextSpan dataTextSpan;
+        if (widget.richData != null) {
+          assert(_isTextSpan(widget.richData!));
+          dataTextSpan = TextSpan(
+            style: effectiveTextStyle,
+            children: [widget.richData!],
+          );
+        } else {
+          dataTextSpan = _buildAnnotatedTextSpan(
+            data: widget.data!,
+            textStyle: effectiveTextStyle,
+            regExp: _mergeRegexPatterns(widget.annotations),
+            annotations: widget.annotations,
+          );
+        }
 
         // Create a TextSpan with data
         final text = TextSpan(
           children: [
             if (preTextSpan != null) preTextSpan,
-            annotatedText,
+            dataTextSpan,
             if (postTextSpan != null) postTextSpan,
           ],
         );
@@ -255,10 +346,13 @@ class ReadMoreTextState extends State<ReadMoreText> {
           text: link,
           textAlign: textAlign,
           textDirection: textDirection,
+          locale: locale,
           textScaler: textScaler,
           maxLines: widget.trimLines,
+          strutStyle: widget.strutStyle,
+          textWidthBasis: textWidthBasis,
+          textHeightBehavior: textHeightBehavior,
           ellipsis: overflow == TextOverflow.ellipsis ? widget.delimiter : null,
-          locale: locale,
         );
         textPainter.layout(maxWidth: maxWidth);
         final linkSize = textPainter.size;
@@ -299,50 +393,72 @@ class ReadMoreTextState extends State<ReadMoreText> {
         late final TextSpan textSpan;
         switch (widget.trimMode) {
           case TrimMode.Length:
-            if (widget.trimLength < widget.data.length) {
-              final effectiveAnnotatedText = isCollapsed
-                  ? _trimTextSpan(
-                      textSpan: annotatedText,
-                      spanStartIndex: 0,
-                      endIndex: widget.trimLength,
-                    ).textSpan
-                  : annotatedText;
-
-              textSpan = TextSpan(
-                style: effectiveTextStyle,
-                children: <TextSpan>[effectiveAnnotatedText, delimiter, link],
+            if (widget.richData != null) {
+              final trimResult = _trimTextSpan(
+                textSpan: dataTextSpan,
+                spanStartIndex: 0,
+                endIndex: widget.trimLength,
               );
+
+              if (trimResult.didTrim) {
+                textSpan = TextSpan(
+                  children: [
+                    if (isCollapsed) trimResult.textSpan else dataTextSpan,
+                    delimiter,
+                    link,
+                  ],
+                );
+              } else {
+                textSpan = dataTextSpan;
+              }
             } else {
-              textSpan = annotatedText;
+              if (widget.trimLength < widget.data!.length) {
+                final effectiveDataTextSpan = isCollapsed
+                    ? _trimTextSpan(
+                        textSpan: dataTextSpan,
+                        spanStartIndex: 0,
+                        endIndex: widget.trimLength,
+                      ).textSpan
+                    : dataTextSpan;
+
+                textSpan = TextSpan(
+                  children: <TextSpan>[
+                    effectiveDataTextSpan,
+                    delimiter,
+                    link,
+                  ],
+                );
+              } else {
+                textSpan = dataTextSpan;
+              }
             }
             break;
           case TrimMode.Line:
             if (textPainter.didExceedMaxLines) {
-              final effectiveAnnotatedText = isCollapsed
+              final effectiveDataTextSpan = isCollapsed
                   ? _trimTextSpan(
-                      textSpan: annotatedText,
+                      textSpan: dataTextSpan,
                       spanStartIndex: 0,
                       endIndex: endIndex,
                     ).textSpan
-                  : annotatedText;
+                  : dataTextSpan;
 
               textSpan = TextSpan(
-                style: effectiveTextStyle,
                 children: <TextSpan>[
-                  effectiveAnnotatedText,
+                  effectiveDataTextSpan,
                   if (linkLongerThanLine) const TextSpan(text: _kLineSeparator),
                   delimiter,
                   link,
                 ],
               );
             } else {
-              textSpan = annotatedText;
+              textSpan = dataTextSpan;
             }
             break;
         }
 
-        return Text.rich(
-          TextSpan(
+        return RichText(
+          text: TextSpan(
             children: [
               if (preTextSpan != null) preTextSpan,
               textSpan,
@@ -351,12 +467,25 @@ class ReadMoreTextState extends State<ReadMoreText> {
           ),
           textAlign: textAlign,
           textDirection: textDirection,
-          softWrap: true,
-          overflow: TextOverflow.clip,
+          locale: locale,
+          softWrap: softWrap,
+          overflow: overflow,
           textScaler: textScaler,
+          strutStyle: widget.strutStyle,
+          textWidthBasis: textWidthBasis,
+          textHeightBehavior: textHeightBehavior,
+          selectionRegistrar: registrar,
+          selectionColor: selectionColor,
         );
       },
     );
+    if (registrar != null) {
+      result = MouseRegion(
+        cursor: DefaultSelectionStyle.of(context).mouseCursor ??
+            SystemMouseCursors.text,
+        child: result,
+      );
+    }
     if (widget.semanticsLabel != null) {
       result = Semantics(
         textDirection: widget.textDirection,
@@ -371,7 +500,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
 
   TextSpan _buildAnnotatedTextSpan({
     required String data,
-    required TextStyle? textStyle,
+    required TextStyle textStyle,
     required RegExp? regExp,
     required List<Annotation>? annotations,
   }) {
