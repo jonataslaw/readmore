@@ -45,3 +45,7 @@ dependencies:
 #
 # For details regarding fonts in packages, see
 # https://flutter.dev/custom-fonts/#from-packages
+
+screenshots:
+  - description: 'This screenshot provides a preview of the readmore package.'
+    path: read-more-text-view-flutter.gif
