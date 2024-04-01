@@ -143,7 +143,7 @@ class _DemoAppState extends State<DemoApp> {
                 regExp: RegExp(r'<@(\d+)>'),
                 spanBuilder: ({
                   required String text,
-                  TextStyle? textStyle,
+                  required TextStyle textStyle,
                 }) {
                   final user = userMap[int.tryParse(
                     text.substring(2, text.length - 1),
@@ -152,8 +152,7 @@ class _DemoAppState extends State<DemoApp> {
                   if (user == null) {
                     return TextSpan(
                       text: '@unknown user',
-                      // making TextStyle to non nullable doesn't break 3.0.0 version
-                      style: (textStyle ?? const TextStyle()).copyWith(
+                      style: textStyle.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                       recognizer: TapGestureRecognizer()
@@ -163,7 +162,7 @@ class _DemoAppState extends State<DemoApp> {
 
                   return TextSpan(
                     text: '@$user',
-                    style: (textStyle ?? const TextStyle()).copyWith(
+                    style: textStyle.copyWith(
                       decoration: TextDecoration.underline,
                       color: Colors.redAccent,
                     ),
