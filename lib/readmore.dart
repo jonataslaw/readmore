@@ -560,7 +560,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
 
       if (spanEndIndex >= endIndex) {
         final nextSpan = TextSpan(
-          text: text.substring(0, endIndex - spanStartIndex),
+          text: String.fromCharCodes(text.runes, 0, endIndex - spanStartIndex),
           children: null, // remove potential children
           style: textSpan.style,
           recognizer: textSpan.recognizer,
