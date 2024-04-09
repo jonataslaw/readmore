@@ -91,7 +91,7 @@ class _DemoAppState extends State<DemoApp> {
           key: const Key('showMore'),
           padding: const EdgeInsets.all(16),
           child: ReadMoreText(
-            'Flutter is Google’s mobile UI open source framework to build high-quality native (super fast) interfaces for iOS and Android apps with the unified codebase.',
+            'Flutter is Google’s mobile UI open source framework to build high-quality native (super fast) interfaces for iOS and Android apps with the unified codebase.😊😊😊',
             trimMode: _trimMode,
             trimLines: _trimLines,
             trimLength: _trimLength,
@@ -109,7 +109,7 @@ class _DemoAppState extends State<DemoApp> {
         Padding(
           padding: const EdgeInsets.all(16),
           child: ReadMoreText(
-            'Flutter(https://flutter.dev/) has its own UI components, along with an engine to render them on both the <@123> and <@456> platforms <@999> http://google.com #read_more. Most of those UI components, right out of the box, conform to the guidelines of #Material Design.',
+            'Flutter(https://flutter.dev/) has its own UI components, along with an engine to render them on both the <@123> and <@456> platforms <@999> http://google.com #read_more. Most of those UI components, right out of the box, conform to the guidelines of #Material Design.😊😊😊',
             trimMode: _trimMode,
             trimLines: _trimLines,
             trimLength: _trimLength,
@@ -203,7 +203,7 @@ class _DemoAppState extends State<DemoApp> {
         Padding(
           padding: const EdgeInsets.all(16),
           child: ReadMoreText(
-            'The Flutter framework builds its layout via the composition of widgets, everything that you construct programmatically is a widget and these are compiled together to create the user interface. ',
+            'The Flutter framework builds its layout via the composition of widgets, everything that you construct programmatically is a widget and these are compiled together to create the user interface. 😊😊😊',
             trimMode: _trimMode,
             trimLines: _trimLines,
             trimLength: _trimLength,
@@ -255,7 +255,7 @@ class _DemoAppState extends State<DemoApp> {
                 ),
                 const TextSpan(
                   text:
-                      'everything that you construct programmatically is a widget and these are compiled together to create the user interface.',
+                      'everything that you construct programmatically is a widget and these are compiled together to create the user interface.😊😊😊',
                 ),
               ],
             ),

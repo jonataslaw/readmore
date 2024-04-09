@@ -317,12 +317,14 @@ class ReadMoreTextState extends State<ReadMoreText> {
         }
 
         final TextSpan dataTextSpan;
+        // Constructed by ReadMoreText.rich(...)
         if (widget.richData != null) {
           assert(_isTextSpan(widget.richData!));
           dataTextSpan = TextSpan(
             style: effectiveTextStyle,
             children: [widget.richData!],
           );
+          // Constructed by ReadMoreText(...)
         } else {
           dataTextSpan = _buildAnnotatedTextSpan(
             data: widget.data!,
@@ -393,6 +395,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
         late final TextSpan textSpan;
         switch (widget.trimMode) {
           case TrimMode.Length:
+            // Constructed by ReadMoreText.rich(...)
             if (widget.richData != null) {
               final trimResult = _trimTextSpan(
                 textSpan: dataTextSpan,
@@ -411,8 +414,9 @@ class ReadMoreTextState extends State<ReadMoreText> {
               } else {
                 textSpan = dataTextSpan;
               }
+              // Constructed by ReadMoreText(...)
             } else {
-              if (widget.trimLength < widget.data!.length) {
+              if (widget.trimLength < widget.data!.runes.length) {
                 final effectiveDataTextSpan = isCollapsed
                     ? _trimTextSpan(
                         textSpan: dataTextSpan,
@@ -554,8 +558,11 @@ class ReadMoreTextState extends State<ReadMoreText> {
     var spanEndIndex = spanStartIndex;
 
     final text = textSpan.text;
+    // In the case of RichText(Constructed by ReadMoreText.rich(...)),
+    // "textSpan.text" is null. Therefore, in the process below, this function
+    // is recursively called for the contents of the children of TextSpan.
     if (text != null) {
-      final textLen = text.length;
+      final textLen = text.runes.length;
       spanEndIndex += textLen;
 
       if (spanEndIndex >= endIndex) {
