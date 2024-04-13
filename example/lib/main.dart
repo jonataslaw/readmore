@@ -268,6 +268,21 @@ class _DemoAppState extends State<DemoApp> {
             trimExpandedText: ' Less',
           ),
         ),
+        const Divider(
+          color: Color(0xFF167F67),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: ReadMoreText(
+            '😊' * 200,
+            trimMode: _trimMode,
+            trimLines: _trimLines,
+            trimLength: _trimLength,
+            colorClickableText: Colors.blueAccent,
+            trimCollapsedText: '...Read more',
+            trimExpandedText: ' Less',
+          ),
+        ),
       ],
     );
   }
