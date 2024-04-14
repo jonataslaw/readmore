@@ -401,6 +401,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
                 textSpan: dataTextSpan,
                 spanStartIndex: 0,
                 endIndex: widget.trimLength,
+                splitByRunes: true,
               );
 
               if (trimResult.didTrim) {
@@ -414,14 +415,16 @@ class ReadMoreTextState extends State<ReadMoreText> {
               } else {
                 textSpan = dataTextSpan;
               }
-              // Constructed by ReadMoreText(...)
-            } else {
+            }
+            // Constructed by ReadMoreText(...)
+            else {
               if (widget.trimLength < widget.data!.runes.length) {
                 final effectiveDataTextSpan = isCollapsed
                     ? _trimTextSpan(
                         textSpan: dataTextSpan,
                         spanStartIndex: 0,
                         endIndex: widget.trimLength,
+                        splitByRunes: true,
                       ).textSpan
                     : dataTextSpan;
 
@@ -444,6 +447,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
                       textSpan: dataTextSpan,
                       spanStartIndex: 0,
                       endIndex: endIndex,
+                      splitByRunes: false,
                     ).textSpan
                   : dataTextSpan;
 
@@ -554,20 +558,22 @@ class ReadMoreTextState extends State<ReadMoreText> {
     required TextSpan textSpan,
     required int spanStartIndex,
     required int endIndex,
+    required bool splitByRunes,
   }) {
     var spanEndIndex = spanStartIndex;
 
     final text = textSpan.text;
-    // In the case of RichText(Constructed by ReadMoreText.rich(...)),
-    // "textSpan.text" is null. Therefore, in the process below, this function
-    // is recursively called for the contents of the children of TextSpan.
     if (text != null) {
-      final textLen = text.runes.length;
+      final textLen = splitByRunes ? text.runes.length : text.length;
       spanEndIndex += textLen;
 
       if (spanEndIndex >= endIndex) {
+        final newText = splitByRunes
+            ? String.fromCharCodes(text.runes, 0, endIndex - spanStartIndex)
+            : text.substring(0, endIndex - spanStartIndex);
+
         final nextSpan = TextSpan(
-          text: String.fromCharCodes(text.runes, 0, endIndex - spanStartIndex),
+          text: newText,
           children: null, // remove potential children
           style: textSpan.style,
           recognizer: textSpan.recognizer,
@@ -598,6 +604,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
             textSpan: child,
             spanStartIndex: spanEndIndex,
             endIndex: endIndex,
+            splitByRunes: splitByRunes,
           );
 
           spanEndIndex = result.spanEndIndex;
