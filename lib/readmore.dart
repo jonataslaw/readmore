@@ -285,7 +285,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
           ? widget.trimCollapsedText.isNotEmpty
               ? widget.delimiter
               : ''
-          : '',
+          : ' ',
       style: defaultDelimiterStyle,
       recognizer: _recognizer,
     );
