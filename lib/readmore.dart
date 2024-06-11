@@ -5,6 +5,12 @@ import 'package:flutter/material.dart';
 
 enum TrimMode { Length, Line }
 
+/// Optional callback that is called when the user taps on the read more link.
+/// The callback function receives a boolean parameter that indicates whether
+/// the text is expanded or collapsed. If the [isExpandable] property is false,
+/// the function will always receive false since the text cannot be expanded.
+typedef OnTapCallback = void Function(bool isExpanded);
+
 /// Defines a customizable pattern within text, such as hashtags, URLs, or mentions.
 ///
 /// Enables applying custom styles and interactions to matched patterns,
@@ -55,6 +61,7 @@ class ReadMoreText extends StatefulWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
+    this.callback,
   })  : richData = null,
         richPreData = null,
         richPostData = null;
@@ -88,6 +95,7 @@ class ReadMoreText extends StatefulWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
+    this.callback,
   })  : data = null,
         annotations = null,
         preDataText = null,
@@ -96,6 +104,8 @@ class ReadMoreText extends StatefulWidget {
         postDataTextStyle = null;
 
   final ValueNotifier<bool>? isCollapsed;
+
+  final OnTapCallback? callback;
 
   /// Used on TrimMode.Length
   final int trimLength;
@@ -183,6 +193,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
     if (widget.isExpandable) {
       _effectiveIsCollapsed.value = !_effectiveIsCollapsed.value;
     }
+    widget.callback?.call(!_effectiveIsCollapsed.value);
   }
 
   RegExp? _mergeRegexPatterns(List<Annotation>? annotations) {
